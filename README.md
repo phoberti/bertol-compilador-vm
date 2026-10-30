@@ -97,9 +97,6 @@ Para um guia completo, desde a preparação do computador, veja o [**Passo a pas
 
 > Dica: o botão **!** da VM abre um guia com o passo a passo e os formatos de instrução aceitos.
 
-Se publicar com **GitHub Pages**, as ferramentas ficam acessíveis por link, por exemplo:
-`https://phoberti.github.io/bertol-compilador-vm/Berti%20VM/`.
-
 ---
 
 ## Passo a passo detalhado
