@@ -1,0 +1,27 @@
+Pequena explicação sobre cada modo de recuperação:
+
+OBS: Em todo erro, sempre vai haver o registro, mesmo que não seja tomada nenhuma ação extra
+
+Léxico: Descarta o token e prossegue analise
+
+Sintático: 
+
+SLR: Descarta o Token e avança nos tokens até encontrar um token de sincronização 
+
+Tokens de Sincronização: #, }, $, SE, ENQUANTO, PARA, RECEBE, MOSTRA, ID, PARE
+
+Reinicia a pilha
+
+LL(1) : Se o token atual for um token de sincronização, descarta o não terminal no topo da pilha
+Se o token atual não for um token de sincronização, apenas prossegue o procedimento (avança o ponteiro da entrada)
+
+Semântico:
+
+Toma Ações Paliativas
+
+1 - Variável não declarada usada em uma expressão: Declara a variavel como inteiro
+2 - Variável não declarada em comandos RECEBE ou MOSTRA: Apenas registra o erro
+3 - Condição de SE, ENQUANTO ou PARA não é do tipo LOGICO: Apenas registra o erro
+4 - Operador aplicado a tipo incorreto (ex.: XX sobre não‑lógico, operador aritmético sobre string): Registra o erro e força um tipo de retorno (ex: LOGICO para XX, INTEIRO/DECIMAL para aritméticos)
+5 - PARE fora de laço: Apenas registra o erro
+6 - Variável de controle do PARA não é INTEIRO: Registra o erro e continua a análise do laço.

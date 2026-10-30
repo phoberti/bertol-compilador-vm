@@ -1,0 +1,34 @@
+@@ TESTE 05 — Laço ENQUANTO
+@@ Testa: ENQUANTO simples, ENQUANTO com PARE, laços aninhados
+@@ TAC esperado: Linicio, condição, Ltrue, corpo, goto Linicio, Lfim
+
+@@ ENQUANTO simples — conta de 1 a 5
+i[INTEIRO] VALE 1#
+MOSTRA["Contagem 1 a 5: "]#
+ENQUANTO(i MEG 5) {
+    MOSTRA[i]#
+    i VALE i ADD 1#
+}
+
+@@ ENQUANTO com PARE — para no primeiro par
+MOSTRA["Primeiro par >= 7: "]#
+n[INTEIRO] VALE 7#
+ENQUANTO(VERDADEIRO) {
+    r[LOGICO]#
+    r VALE (n RESTO 2) IGUAL 0#
+    SE(r) {
+        MOSTRA[n]#
+        PARE#
+    }
+    n VALE n ADD 1#
+}
+
+@@ Soma de 1 a 10
+soma[INTEIRO] VALE 0#
+k[INTEIRO] VALE 1#
+ENQUANTO(k MEG 10) {
+    soma VALE soma ADD k#
+    k VALE k ADD 1#
+}
+MOSTRA["Soma 1 a 10 = "]#
+MOSTRA[soma]#

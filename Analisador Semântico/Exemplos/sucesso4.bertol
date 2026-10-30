@@ -1,0 +1,50 @@
+@@ sucesso4.bertol
+@@ Cobre: RS-11 ($$ e ?? com operandos LOGICO — OK),
+@@         RS-12 (XX com operando LOGICO — OK),
+@@         RS-14 (operadores logicos produzem LOGICO),
+@@         RS-10 (IGUAL e DIFERENTE com mesmo tipo — OK)
+
+temCarteira[LOGICO] VALE VERDADEIRO#
+temVeiculo[LOGICO] VALE FALSO#
+idade[INTEIRO] VALE 20#
+nome[TEXTO] VALE "Carlos"#
+nomeRef[TEXTO] VALE "Carlos"#
+
+@@ RS-11: $$ com dois operandos LOGICO — OK
+@@ RS-14: resultado e LOGICO
+podeConduir[LOGICO]#
+podeConduir VALE temCarteira $$ temVeiculo#
+
+@@ RS-11: ?? com dois operandos LOGICO — OK
+@@ RS-14: resultado e LOGICO
+temAlgum[LOGICO]#
+temAlgum VALE temCarteira ?? temVeiculo#
+
+@@ RS-12: XX com operando LOGICO — OK
+@@ RS-14: resultado e LOGICO
+naoTemCarteira[LOGICO]#
+naoTemCarteira VALE XX temCarteira#
+
+@@ RS-12: XX com resultado de expressao relacional (que e LOGICO) — OK
+naoEhMenor[LOGICO]#
+naoEhMenor VALE XX(idade MENOR 18)#
+
+@@ RS-10: IGUAL com dois INTEIRO — mesmo tipo — OK
+idadeIgual[LOGICO]#
+idadeIgual VALE idade IGUAL 20#
+
+@@ RS-10: DIFERENTE com dois TEXTO — mesmo tipo — OK
+nomeDiferente[LOGICO]#
+nomeDiferente VALE nome DIFERENTE nomeRef#
+
+@@ RS-10: IGUAL com dois LOGICO — mesmo tipo — OK
+mesmaSituacao[LOGICO]#
+mesmaSituacao VALE temCarteira IGUAL temVeiculo#
+
+MOSTRA["Pode conduzir: ", podeConduir]#
+MOSTRA["Tem algum: ", temAlgum]#
+MOSTRA["Nao tem carteira: ", naoTemCarteira]#
+MOSTRA["Nao e menor: ", naoEhMenor]#
+MOSTRA["Idade igual 20: ", idadeIgual]#
+MOSTRA["Nome diferente: ", nomeDiferente]#
+MOSTRA["Mesma situacao: ", mesmaSituacao]#

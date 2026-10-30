@@ -1,0 +1,18 @@
+@@ Teste Sintático 1 — Declarações, atribuições e reatribuição
+nome[TEXTO]#
+idade[INTEIRO]#
+salario[DECIMAL]#
+ativo[LOGICO]#
+
+nome VALE "Maria"#
+idade VALE 28#
+salario VALE 1500.50#
+ativo VALE VERDADEIRO#
+
+@@ Reatribuição simples
+idade VALE 30#
+salario VALE salario ADD 500.00#
+
+MOSTRA["Nome: ", nome]#
+MOSTRA["Idade: ", idade]#
+MOSTRA["Salario: ", salario]#

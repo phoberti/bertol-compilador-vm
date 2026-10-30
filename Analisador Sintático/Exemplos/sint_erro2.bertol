@@ -1,0 +1,8 @@
+@@ Erro Sintático 2 — SE sem bloco de chaves
+valor[INTEIRO]#
+valor VALE 10#
+
+SE(valor MAIOR 0)
+    MOSTRA["Positivo"]#
+
+MOSTRA["Fim"]#

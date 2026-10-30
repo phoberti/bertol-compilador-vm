@@ -1,0 +1,39 @@
+@@ TESTE 06 — Laço PARA
+@@ Testa: PARA com literal, PARA com variável em ATE, PARA com PARE
+@@ TAC esperado: init, Linicio, tCond = varCtrl <= ATE, incremento no }
+
+@@ PARA simples — tabuada do 3
+i[INTEIRO]#
+prod[INTEIRO]#
+MOSTRA["Tabuada do 3:"]#
+PARA i DE 1 ATE 10 PASSO 1 {
+    prod VALE 3 MULT i#
+    MOSTRA["3 x "]#
+    MOSTRA[i]#
+    MOSTRA[" = "]#
+    MOSTRA[prod]#
+}
+
+@@ PARA com variável em ATE
+limite[INTEIRO]#
+MOSTRA["Ate qual numero somar? "]#
+RECEBE[limite]#
+soma[INTEIRO] VALE 0#
+j[INTEIRO]#
+PARA j DE 1 ATE limite PASSO 1 {
+    soma VALE soma ADD j#
+}
+MOSTRA["Soma = "]#
+MOSTRA[soma]#
+
+@@ PARA com PARE — acha primeiro multiplo de 7 entre 1 e 100
+m[INTEIRO]#
+MOSTRA["Primeiro multiplo de 7 >= 1: "]#
+PARA m DE 1 ATE 100 PASSO 1 {
+    cond[LOGICO]#
+    cond VALE (m RESTO 7) IGUAL 0#
+    SE(cond) {
+        MOSTRA[m]#
+        PARE#
+    }
+}

@@ -1,0 +1,21 @@
+@@ erro2.bertol
+@@ Cobre: RS-03 (tipo incompativel na declaracao com VALE),
+@@         RS-04 (variavel nao declarada no lado esquerdo da atribuicao),
+@@         RS-05 (tipo incompativel na reatribuicao),
+@@         RS-22 (MOSTRA com variavel nao declarada)
+
+@@ RS-03: 'nota' e TEXTO mas recebe literal INTEIRO
+nota[TEXTO] VALE 10#
+
+@@ RS-04: 'resultado' nunca foi declarado — atribuicao invalida
+resultado VALE 42#
+
+@@ RS-05: 'nota' e TEXTO mas recebe literal DECIMAL
+nota VALE 7.5#
+
+@@ RS-22: 'media' nunca foi declarada — uso em MOSTRA invalido
+MOSTRA["Media: ", media]#
+
+@@ Declaracao valida para testar que o analisador continua apos os erros
+codigo[INTEIRO] VALE 1#
+MOSTRA["Codigo: ", codigo]#

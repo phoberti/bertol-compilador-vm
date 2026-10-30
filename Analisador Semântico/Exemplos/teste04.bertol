@@ -1,0 +1,38 @@
+@@ TESTE 04 — Condicional SE e SE/SENAO
+@@ Testa: SE simples, SE/SENAO, condições aninhadas
+@@ TAC esperado: if/goto com Ltrue, Lfalse, Lfim corretos
+
+nota[DECIMAL]#
+MOSTRA["Digite sua nota (0 a 10): "]#
+RECEBE[nota]#
+
+@@ SE simples
+SE(nota IGUAL 10.0) {
+    MOSTRA["Nota maxima!"]#
+}
+
+@@ SE/SENAO
+SE(nota MAG 7.0) {
+    MOSTRA["Aprovado"]#
+}
+SENAO {
+    MOSTRA["Reprovado"]#
+}
+
+@@ SE/SENAO aninhado
+SE(nota MAG 9.0) {
+    MOSTRA["Conceito: A"]#
+}
+SENAO {
+    SE(nota MAG 7.0) {
+        MOSTRA["Conceito: B"]#
+    }
+    SENAO {
+        SE(nota MAG 5.0) {
+            MOSTRA["Conceito: C"]#
+        }
+        SENAO {
+            MOSTRA["Conceito: D"]#
+        }
+    }
+}

@@ -1,0 +1,23 @@
+@@ Teste Sintático 2 — SE/SENAO e ENQUANTO
+nota[DECIMAL]#
+tentativas[INTEIRO]#
+
+RECEBE[nota]#
+tentativas VALE 0#
+
+@@ Estrutura condicional completa
+SE(nota MAG 6.0) {
+    MOSTRA["Aprovado!"]#
+}
+SENAO {
+    MOSTRA["Reprovado."]#
+}
+
+@@ Laco condicional com PARE
+ENQUANTO(tentativas MENOR 5) {
+    tentativas VALE tentativas ADD 1#
+    SE(tentativas IGUAL 3) {
+        PARE#
+    }
+    MOSTRA["Tentativa: ", tentativas]#
+}

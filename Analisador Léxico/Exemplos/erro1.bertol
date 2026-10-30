@@ -1,0 +1,11 @@
+@@ Erro 1 — Caracteres invalidos e $ isolado
+nome[TEXTO]#
+nome VALE "Ana"#
+
+@@ Tentativa de usar $ isolado (AND incompleto)
+resultado[LOGICO]#
+resultado VALE VERDADEIRO $ FALSO#
+
+@@ Uso de caractere invalido
+valor[INTEIRO]#
+valor VALE 10 + 5#

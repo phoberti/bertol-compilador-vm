@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Berti VM — Máquina Virtual de TAC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="title-block">
+    <h1>Berti VM</h1>
+    <p>Executa o Código de Três Endereços (TAC) gerado pelo compilador Bertol — ou por qualquer outro compilador que siga o mesmo formato.</p>
+  </div>
+  <div class="header-right">
+    <button class="btn-info-rec" id="btn-info" title="Como usar a Berti VM">!</button>
+    <div class="status-pill halted" id="status-pill">ociosa</div>
+  </div>
+</header>
+
+<div class="layout">
+
+  <div class="stack-panels">
+    <div class="panel">
+      <div class="panel-head">
+        <span>1. Entrada TAC</span>
+        <span class="count" id="line-count">0 linhas</span>
+      </div>
+      <textarea id="tac-input" spellcheck="false" placeholder="Cole aqui o código de três endereços (TAC) a executar, ou clique em um dos exemplos abaixo..."></textarea>
+      <div class="controls">
+        <button class="primary" id="btn-load">▶ Carregar programa</button>
+        <button class="ghost" id="btn-example-bertol">Exemplo Bertol</button>
+        <button class="ghost" id="btn-example-generic">Exemplo vetor / ponteiro / função</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <span>2. Execução</span>
+        <span class="count" id="pc-indicator">PC: —</span>
+      </div>
+      <div id="tac-view"></div>
+      <div class="controls">
+        <button class="primary" id="btn-step">Step ▸</button>
+        <button class="primary" id="btn-run">Run ▸▸</button>
+        <button class="primary" id="btn-instant" title="Executa o programa inteiro de uma vez, sem pausas entre instruções"> Instantâneo</button>
+        <button id="btn-pause" disabled>Pausar</button>
+        <button id="btn-reset">↺ Reiniciar</button>
+        <span class="spacer"></span>
+        <span class="speed-label">velocidade do Run</span>
+        <input type="range" id="speed" min="1" max="600" value="200">
+      </div>
+    </div>
+  </div>
+
+  <div class="stack-panels">
+    <div class="panel">
+      <div class="panel-head">
+        <span>3. Memória</span>
+        <span class="count" id="mem-count">0 variáveis</span>
+      </div>
+      <table>
+        <thead><tr><th>variável</th><th>valor</th><th>tipo</th></tr></thead>
+        <tbody id="memory-body"></tbody>
+      </table>
+      <div class="empty-msg" id="memory-empty">nenhuma variável ainda — carregue e execute um programa</div>
+
+      <div class="twocol">
+        <div>
+          <div class="mini-head">MEMÓRIA INDEXADA (vetores / ponteiros)</div>
+          <div class="mini-list" id="heap-list"><div class="mini-empty">vazia</div></div>
+        </div>
+        <div>
+          <div class="mini-head">PILHA DE CHAMADAS / PARÂMETROS</div>
+          <div class="mini-list" id="call-list"><div class="mini-empty">nenhuma chamada ativa</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <span>4. Saída</span>
+        <button class="ghost" id="btn-clear-output" style="padding:3px 9px;font-size:11px;">limpar</button>
+      </div>
+      <div id="output"></div>
+      <div class="input-row" id="input-row" style="display:none;">
+        <label id="input-label">read →</label>
+        <input type="text" id="input-value" autocomplete="off" placeholder="digite o valor e pressione Enter">
+        <button class="primary" id="btn-submit-input">Enviar</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ajuda no mesmo padrão visual do botão "!" do  Bertol -->
+<div class="info-modal-overlay" id="info-modal-overlay">
+  <div class="info-modal">
+    <button class="info-close" id="info-close">×</button>
+    <h2>Como usar a Berti VM</h2>
+    <p style="font-size:12.5px; color:var(--muted); margin-top:2px;">Guia rápido de execução</p>
+
+    <div class="info-section">
+      <h3>Passo a passo</h3>
+      <ul class="info-action-list">
+        <li class="info-action-item"><span class="info-tag">1</span> Cole seu TAC no campo de entrada, ou clique em um dos exemplos prontos.</li>
+        <li class="info-action-item"><span class="info-tag">2</span> Clique em Carregar programa para validar e exibir as instruções.</li>
+        <li class="info-action-item"><span class="info-tag">3</span> Use Step para executar uma instrução por vez, Run para executar continuamente em velocidade ajustável, ou  Instantâneo para rodar o programa inteiro de uma só vez (pausando apenas em cada read).</li>
+        <li class="info-action-item"><span class="info-tag">4</span> Quando o programa chegar a um read, a execução pausa e pede o valor no campo abaixo da Saída.</li>
+      </ul>
+    </div>
+
+
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

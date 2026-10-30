@@ -1,0 +1,7 @@
+@@ Erro 3 — @ isolado, ? isolado e identificador longo demais
+@ comentario incorreto com apenas um arroba
+
+flag[LOGICO]#
+flag VALE VERDADEIRO ? FALSO#
+
+identificadorMuitoLongoQueUltrapassaOLimiteDeTrintaCaracteres[INTEIRO]#

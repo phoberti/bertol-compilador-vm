@@ -1,0 +1,43 @@
+@@ sucesso2.bertol
+@@ Cobre: RS-21 (RECEBE com variavel declarada),
+@@         RS-22 (MOSTRA com IDs declarados e STRINGs),
+@@         RS-15 (condicao do SE corretamente LOGICO),
+@@         RS-16 (condicao do ENQUANTO corretamente LOGICO)
+
+@@ Declaracoes
+nota[DECIMAL]#
+tentativas[INTEIRO] VALE 0#
+maxTentativas[INTEIRO] VALE 3#
+aprovado[LOGICO] VALE FALSO#
+mensagem[TEXTO] VALE "Aguardando"#
+
+@@ RS-21: RECEBE com variavel declarada — OK
+MOSTRA["Informe sua nota (0 a 10): "]#
+RECEBE[nota]#
+
+@@ RS-16: condicao do ENQUANTO e LOGICO (XX aprovado = LOGICO) — OK
+ENQUANTO(XX aprovado) {
+    @@ RS-15: condicao do SE e LOGICO (nota MAG 7.0 = LOGICO) — OK
+    SE(nota MAG 7.0) {
+        aprovado VALE VERDADEIRO#
+        mensagem VALE "Aprovado"#
+    }
+    SENAO {
+        tentativas VALE tentativas ADD 1#
+        mensagem VALE "Reprovado"#
+
+        @@ RS-15: condicao do SE com IGUAL — produz LOGICO — OK
+        SE(tentativas IGUAL maxTentativas) {
+            aprovado VALE VERDADEIRO#
+        }
+        SENAO {
+            MOSTRA["Tente novamente: "]#
+            RECEBE[nota]#
+        }
+    }
+}
+
+@@ RS-22: MOSTRA com STRING literal e IDs declarados — OK
+MOSTRA["Resultado: ", mensagem]#
+MOSTRA["Tentativas usadas: ", tentativas]#
+MOSTRA["Nota final: ", nota]#

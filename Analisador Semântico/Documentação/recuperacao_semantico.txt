@@ -1,0 +1,420 @@
+================================================================================
+  RECUPERAÇÃO DE ERROS — ANALISADOR SEMÂNTICO
+===============================================================================
+
+================================================================================
+ VISÃO GERAL
+================================================================================
+
+O analisador semântico do compilador Bertol verifica as 22 regras semânticas
+(RS-01 a RS-22) da linguagem. Diferentemente dos analisadores léxico e
+sintático, o semântico opera sobre a sequência de tokens já validada e
+percorre as construções da linguagem de forma linear.
+
+O parâmetro `recuperacao` controla o comportamento ao detectar cada violação:
+
+  recuperacao = true  -> Modo com recuperação
+                        O erro é registrado, mas a análise continua do
+                        ponto seguinte. Estratégias específicas são aplicadas
+                        para manter a análise coerente (ex: inserção de
+                        variável fictícia na tabela de símbolos).
+
+  recuperacao = false -> Modo sem recuperação (PADRÃO do semântico)
+                        Ao detectar qualquer erro, a análise para com `break`,
+                        retornando apenas os erros encontrados até ali.
+
+Assinatura:
+
+  AnalisadorSemantico.parse(tokens, recuperacao=false)
+
+Retorna: { traj[], erros[], tabela_simbolos }
+
+
+================================================================================
+ DIFERENÇA FUNDAMENTAL EM RELAÇÃO AOS OUTROS ANALISADORES
+================================================================================
+
+  Léxico e Sintático:
+    A recuperação consiste em descartar entrada problemática e reiniciar
+    em um ponto seguro. O analisador "pula" o trecho com erro.
+
+  Semântico:
+    Não há "pular" de instruções. O semântico percorre token a token e,
+    ao encontrar um erro, tem duas opções:
+
+      a) Sem recuperação: para com `break`.
+      b) Com recuperação: registra o erro e toma uma DECISÃO ATIVA para
+         manter o estado interno da análise coerente.
+
+    Isso é necessário porque o semântico mantém estado (tabela de símbolos,
+    profundidade de laço) que influencia as verificações seguintes.
+    Simplesmente "pular" um erro poderia deixar a tabela inconsistente
+    e causar falsos erros em cascata.
+
+
+================================================================================
+ESTRATÉGIAS DE RECUPERAÇÃO POR REGRA
+================================================================================
+
+As estratégias são aplicadas em três contextos distintos:
+  (A) Na tabela de símbolos
+  (B) Na inferência de tipos (inferirTipoExpr)
+  (C) No fluxo principal de regras semânticas
+
+
+--------------------------------------------------------------------------------
+A RECUPERAÇÃO NA TABELA DE SÍMBOLOS
+--------------------------------------------------------------------------------
+
+Função: verificarUsoId(tok, regra)
+
+  Esta função é chamada toda vez que um identificador aparece em uma
+  expressão. Ela verifica se a variável está declarada e inicializada.
+
+  Código:
+    const verificarUsoId = (tok, regra) => {
+        if (!ts[tok.lexema]) {
+            err(regra, `Linha ${tok.linha}: variável '${tok.lexema}' não declarada.`, null);
+            if (recuperacao)
+                ts[tok.lexema] = { tipo: 'INTEIRO', inicializado: true, linha: tok.linha };
+            return null;
+        }
+        // ...
+    };
+
+  Com recuperacao=true:
+    Quando uma variável é usada sem ter sido declarada, o semântico a
+    insere artificialmente na tabela de símbolos como INTEIRO inicializado.
+
+    Por quê INTEIRO?
+      INTEIRO é o tipo neutro/default da linguagem. Ao assumir INTEIRO,
+      o semântico evita que operações aritméticas ou relacionais que usem
+      a variável gerem uma cascata de erros de tipo. A análise pode
+      continuar verificando as demais variáveis e expressões normalmente.
+
+    Efeito: a variável passa a "existir" na tabela durante o resto da
+    análise. Novos usos dela não geram erro adicional de "não declarada".
+
+  Com recuperacao=false:
+    Retorna null sem inserir nada. A função chamadora receberá null 
+
+
+--------------------------------------------------------------------------------
+ RECUPERAÇÃO NA INFERÊNCIA DE TIPOS (inferirTipoExpr)
+--------------------------------------------------------------------------------
+
+A função inferirTipoExpr percorre recursivamente uma expressão e determina
+seu tipo. Em cada operador, ela verifica se os operandos têm tipos válidos.
+A recuperação influencia o que é retornado quando há incompatibilidade.
+
+ Operador NOT unário (XX)
+---------------------------------
+
+  Código:
+    if (toks2[0]?.token === 'XX') {
+        const tipoOp = inferirTipoExpr(toks2.slice(1), regra);
+        if (tipoOp && tipoOp !== 'LOGICO') {
+            err(regra, `Operador XX aplicado a tipo ${tipoOp} — esperado LOGICO.`, tipoOp);
+            return recuperacao ? 'LOGICO' : null;
+        }
+        return 'LOGICO';
+    }
+
+  Com recuperacao=true:
+    Mesmo que o operando não seja LOGICO, retorna 'LOGICO'.
+    O erro é registrado, mas a subexpressão é tratada como se fosse
+    LOGICO para que as verificações acima na recursão possam continuar.
+
+  Com recuperacao=false:
+    Retorna null, propagando a falha para o chamador.
+
+ Operadores aritméticos (ADD, SUB, MULT, DIV, RESTO)
+-------------------------------------------------------------
+
+  Código:
+    if (ARIT.has(op.token)) {
+        for (const [tp] of [[tEsq], [tDir]]) {
+            if (tp && tp !== 'INTEIRO' && tp !== 'DECIMAL') {
+                err(regra, `...operador ${op.token} aplicado a tipo ${tp}...`);
+                if (!recuperacao) return null;
+            }
+        }
+        return (tEsq === 'DECIMAL' || tDir === 'DECIMAL') ? 'DECIMAL' : 'INTEIRO';
+    }
+
+  Com recuperacao=true:
+    Mesmo com operandos de tipo inválido (ex: TEXTO em uma adição),
+    o erro é registrado mas a função continua e retorna INTEIRO ou DECIMAL
+    conforme o outro operando. A expressão "sobrevive" com um tipo.
+
+  Com recuperacao=false:
+    Retorna null ao primeiro operando com tipo inválido.
+
+Operadores relacionais numéricos (MAIOR, MENOR, MAG, MEG)
+------------------------------------------------------------------
+
+  Código:
+    if (REL_NUM.has(op.token)) {
+        for (const tp of [tEsq, tDir]) {
+            if (tp && tp !== 'INTEIRO' && tp !== 'DECIMAL') {
+                err(regra, `...operador ${op.token} aplicado a tipo ${tp}...`);
+                if (!recuperacao) return null;
+            }
+        }
+        return 'LOGICO';
+    }
+
+  Com recuperacao=true:
+    Registra o erro mas retorna LOGICO de qualquer forma.
+    Isso é especialmente importante para condições de SE e ENQUANTO:
+    mesmo com um operando de tipo errado, a condição é tratada como
+    LOGICO, evitando um erro em cascata de RS-15 ou RS-16.
+
+  Com recuperacao=false:
+    Retorna null, o que fará RS-15/RS-16 reportar que o tipo encontrado
+    é null (ou provocará erro de tipo na condição).
+
+ Operadores relacionais de igualdade (IGUAL, DIFERENTE)
+---------------------------------------------------------------
+
+  Código:
+    if (REL_EQ.has(op.token)) {
+        const numericos = new Set(['INTEIRO', 'DECIMAL']);
+        const mismatch  = tEsq && tDir && tEsq !== tDir &&
+                         !(numericos.has(tEsq) && numericos.has(tDir));
+        if (mismatch) {
+            err(regra, `...operador ${op.token} compara tipos diferentes...`);
+            if (!recuperacao) return null;
+        }
+        return 'LOGICO';
+    }
+
+  Com recuperacao=true:
+    Registra o mismatch de tipos mas retorna LOGICO.
+    Uma comparação INTEIRO IGUAL TEXTO, por exemplo, é erro mas não impede
+    que a condição do SE seja analisada como booleana.
+
+  Com recuperacao=false:
+    Retorna null ao detectar mismatch.
+
+ Operadores lógicos binários ($$ e ??)
+----------------------------------------------
+
+  Código:
+    if (LOG_BIN.has(op.token)) {
+        for (const tp of [tEsq, tDir]) {
+            if (tp && tp !== 'LOGICO') {
+                err(regra, `...operador ${op.token} aplicado a tipo ${tp}...`);
+                if (!recuperacao) return null;
+            }
+        }
+        return 'LOGICO';
+    }
+
+  Com recuperacao=true:
+    Registra o erro mas retorna LOGICO. Um operando INTEIRO em um $$
+    é erro, mas a expressão inteira ainda recebe tipo LOGICO para
+    que o contexto externo (condição de SE/ENQUANTO) possa continuar.
+
+  Com recuperacao=false:
+    Retorna null ao primeiro operando não-LOGICO.
+
+
+--------------------------------------------------------------------------------
+RECUPERAÇÃO NO FLUXO PRINCIPAL DE REGRAS
+--------------------------------------------------------------------------------
+
+No laço principal do semântico, cada regra aplicada pode detectar um erro.
+O padrão é sempre:
+
+  err('RS-XX', mensagem);
+  if (!recuperacao) break;
+  // continua com a próxima instrução
+
+A seguir, as regras com comportamento de recuperação relevante:
+
+RS-01: Variável redeclarada
+-------------------------------------
+
+  Código:
+    if (ts[nome]) {
+        err('RS-01', `Variável '${nome}' já declarada na linha ${ts[nome].linha}.`);
+        if (!recuperacao) break;
+    } else {
+        ts[nome] = { tipo, inicializado: false, linha };
+    }
+
+  Com recuperacao=true:
+    O erro é registrado, mas a análise continua. A variável NÃO é
+    reinserida — mantém-se a primeira declaração na tabela de símbolos.
+    As instruções seguintes que usam essa variável são analisadas
+    normalmente com o tipo da primeira declaração.
+
+  Com recuperacao=false:
+    Para com break.
+
+ RS-03: Tipo incompatível na inicialização
+---------------------------------------------------
+
+  Código:
+    if (tipoExpr && !compativel(tipoExpr, tipo)) {
+        err('RS-03', `tipo incompatível — '${nome}' é ${tipo}, expressão é ${tipoExpr}.`);
+        if (!recuperacao) break;
+    } else if (tipoExpr && compativel(tipoExpr, tipo)) {
+        ts[nome].inicializado = true;
+    }
+
+  Com recuperacao=true:
+    O erro é registrado. A variável NÃO é marcada como inicializada
+    (ts[nome].inicializado permanece false). Usos futuros dela podem
+    gerar erro de RS-06 ("usada antes de ser inicializada"), o que é
+    o comportamento correto — há dois erros distintos.
+
+  Com recuperacao=false:
+    Para com break.
+
+RS-04: Variável não declarada em atribuição
+------------------------------------------------------
+
+  Código:
+    if (!ts[nome]) {
+        err('RS-04', `variável '${nome}' não declarada.`);
+        if (!recuperacao) break;
+        i += 2;
+        const [, ni] = coletarExpr(i, ['#']);
+        i = ni + 1;
+        continue;
+    }
+
+  Com recuperacao=true:
+    Comportamento especial: além de registrar o erro, o semântico
+    CONSOME TODA A INSTRUÇÃO (avança até o '#' e continua no próximo
+    token). Isso é necessário porque, sem a variável na tabela, a
+    expressão do lado direito não pode ser analisada de forma útil.
+    Pular a instrução inteira evita erros espúrios na expressão.
+
+  Com recuperacao=false:
+    Para com break.
+
+ RS-05: Tipo incompatível em atribuição
+------------------------------------------------
+
+  Código:
+    if (tipoExpr && !compativel(tipoExpr, ts[nome].tipo)) {
+        err('RS-05', `tipo incompatível — '${nome}' é ${ts[nome].tipo}, expressão é ${tipoExpr}.`);
+        if (!recuperacao) break;
+    } else if (...) {
+        ts[nome].inicializado = true;
+    }
+
+  Com recuperacao=true:
+    A variável NÃO é marcada como inicializada (mesmo raciocínio de RS-03).
+    A análise continua para as instruções seguintes.
+
+  Com recuperacao=false:
+    Para com break.
+
+RS-15: Condição do SE não é LOGICO
+-------------------------------------------
+
+  Código:
+    const tipoExpr = inferirTipoExpr(exprToks, 'RS-15');
+    if (tipoExpr && tipoExpr !== 'LOGICO') {
+        err('RS-15', `condição do SE deve ser LOGICO, encontrado ${tipoExpr}.`);
+        if (!recuperacao) break;
+    }
+    i = ni + 1;  // sempre consome o ')'
+
+  Com recuperacao=true:
+    Registra o erro mas o parser continua percorrendo o bloco do SE
+    normalmente. O ')' é consumido e as instruções do bloco são
+    analisadas. Outros erros dentro do bloco (ex: variáveis não
+    declaradas) continuam sendo detectados.
+
+  Com recuperacao=false:
+    Para com break antes de consumir o ')'.
+
+ RS-16: Condição do ENQUANTO não é LOGICO
+--------------------------------------------------
+
+  Idêntico ao RS-15, mas para ENQUANTO. A profundidade do laço
+  (profLaco++) é incrementada antes da verificação, portanto
+  mesmo com erro na condição o PARE dentro do bloco é válido.
+
+ RS-17: Variável do PARA não é INTEIRO
+-----------------------------------------------
+
+  Código:
+    } else if (ts[idTok.lexema].tipo !== 'INTEIRO') {
+        err('RS-17', `variável do PARA '${idTok.lexema}' deve ser INTEIRO...`);
+        if (!recuperacao) break;
+    } else {
+        ts[idTok.lexema].inicializado = true;
+    }
+
+  Com recuperacao=true:
+    A variável de controle NÃO é marcada como inicializada.
+    A análise continua verificando DE, ATE e PASSO normalmente.
+
+  Com recuperacao=false:
+    Para com break.
+
+RS-20: PARE fora de laço
+----------------------------------
+
+  Código:
+    if (profLaco === 0) {
+        err('RS-20', `instrução PARE fora de estrutura de repetição.`);
+        if (!recuperacao) break;
+    }
+    i += 2;  // PARE #
+
+  Com recuperacao=true:
+    O PARE inválido é registrado mas consumido. A análise continua
+    normalmente com as instruções seguintes.
+
+  Com recuperacao=false:
+    Para com break.
+
+ RS-21: Variável não declarada em RECEBE
+-------------------------------------------------
+
+  Código:
+    if (!ts[idTok.lexema]) {
+        err('RS-21', `variável '${idTok.lexema}' não declarada em RECEBE.`);
+        if (!recuperacao) break;
+    } else {
+        ts[idTok.lexema].inicializado = true;
+    }
+
+  Com recuperacao=true:
+    Registra o erro. A variável NÃO é inserida na tabela (diferente
+    de verificarUsoId — aqui o contexto é uma entrada de dados, não
+    uma expressão). A instrução RECEBE é consumida até '#' de qualquer
+    forma (o laço `while` abaixo do if sempre avança até '#').
+
+  Com recuperacao=false:
+    Para com break, mas o while de consumo até '#' não é mais executado.
+
+RS-22: Variável não declarada em MOSTRA
+--------------------------------------------------
+
+  Código:
+    while (i < toks.length && toks[i].token !== ']') {
+        if (v.token === 'ID') {
+            if (!ts[v.lexema]) {
+                err('RS-22', `variável '${v.lexema}' não declarada em MOSTRA.`);
+                if (!recuperacao) break;  // break do while interno
+            }
+        }
+        i++;
+    }
+
+  Com recuperacao=true:
+    Se uma variável do MOSTRA não está declarada, o erro é registrado
+    mas o while interno continua percorrendo os demais itens da lista
+    de exibição. Todas as variáveis do MOSTRA são verificadas, mesmo
+    que algumas estejam com erro.
+
+  Com recuperacao=false:
+    O break sai do while interno imediatamente ao primeiro erro.

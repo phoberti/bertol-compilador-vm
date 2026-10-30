@@ -1,0 +1,264 @@
+================================================================================
+  RECUPERAÇÃO DE ERROS - ANALISADOR LÉXICO 
+================================================================================
+
+
+================================================================================
+1. VISÃO GERAL
+================================================================================
+
+O analisador léxico do compilador Bertol é implementado como um Autômato
+Finito Determinístico (AFD). Ele possui dois modos de operação, controlados
+pelo parâmetro booleano `recuperacao`:
+
+  recuperacao = true  -> Modo com recuperação (padrão)
+                        Registra o erro, descarta o lexema problemático,
+                        reinicia o AFD no estado inicial (q1) e continua
+                        a varredura do restante do código.
+
+  recuperacao = false -> Modo sem recuperação
+                        Ao detectar o primeiro erro, interrompe imediatamente
+                        a análise e retorna apenas os tokens e erros coletados
+                        até aquele ponto.
+
+Assinatura da função:
+
+  function executarAnalisadorLexicoAFD(codigo_fonte, tabela_simbolos, recuperacao=true)
+
+
+================================================================================
+2. ESTRATÉGIA DE RECUPERAÇÃO
+================================================================================
+
+A estratégia adotada é chamada de "reinício no estado inicial":
+
+  1. O erro é detectado em algum estado intermediário do AFD.
+  2. A mensagem de erro é registrada (com linha e coluna).
+  3. O lexema parcialmente construído é descartado (lexema = "").
+  4. O AFD retorna ao estado inicial q1.
+  5. A varredura continua a partir do próximo caractere.
+
+Isso significa que o compilador tenta reconhecer o máximo de tokens válidos
+possível, mesmo na presença de erros léxicos. Todos os erros encontrados são
+acumulados no array `erros` e reportados ao final.
+
+Limite: não há limite máximo de erros no léxico — todos são reportados.
+
+================================================================================
+3. PONTOS DE ERRO E COMPORTAMENTO
+================================================================================
+
+Existem 6 pontos no AFD onde erros podem ocorrer. Em cada um deles, o
+comportamento com e sem recuperação é descrito abaixo.
+
+--------------------------------------------------------------------------------
+Caractere inesperado no estado inicial (q1)
+--------------------------------------------------------------------------------
+
+  Ocorre quando: um caractere não pertence a nenhuma categoria reconhecida
+  pela linguagem (não é letra, dígito, aspas, espaço, @, ?, $, #, delimitador).
+
+  Exemplo de entrada que causa o erro:
+    resultado = a % b   <- o '=' não é um token da linguagem Bertol
+
+  Código:
+    case 1:
+        // ...
+        else {
+            registrarTransicao(1, caractere, 'ERRO');
+            registrarErro(`Caractere inesperado: '${caractere}'`);
+            if (!recuperacao) return { tokens, erros };
+            hasChars = proximoCaractere();  // descarta o caractere e continua
+        }
+
+  Com recuperacao=true:
+    - Registra o erro.
+    - Descarta o caractere inválido com proximoCaractere().
+    - O AFD já está em q1, então recomeça normalmente.
+
+  Com recuperacao=false:
+    - Retorna imediatamente com os tokens e erros até aquele ponto.
+
+--------------------------------------------------------------------------------
+ Número mal formado — dígito após ponto (q5)
+--------------------------------------------------------------------------------
+
+  Ocorre quando: após reconhecer dígitos e um ponto (ex: "3."), o próximo
+  caractere não é um dígito.
+
+  Exemplo:
+    x VALE 3.a   <- "3." forma um número incompleto
+
+  Código:
+    case 5:
+        if (isDigit(caractere)) { ... estado = 6; }
+        else {
+            registrarTransicao(5, caractere, 'ERRO');
+            registrarErro(`Número mal formado '${lexema}' — esperado dígito após '.'.`);
+            lexema = "";
+            estado = 1;
+            if (!recuperacao) return { tokens, erros };
+            // não chama proximoCaractere() — o caractere atual é reprocessado em q1
+        }
+
+  Com recuperacao=true:
+    - Descarta o lexema "3." sem emitir token.
+    - Retorna ao estado q1.
+    - O caractere que causou o erro ('a') é reprocessado a partir de q1,
+      podendo gerar um token válido (ID "a" neste caso).
+
+  Com recuperacao=false:
+    - Retorna imediatamente.
+
+--------------------------------------------------------------------------------
+ String não fechada — quebra de linha (q8)
+--------------------------------------------------------------------------------
+
+  Ocorre quando: dentro de uma string (entre aspas), é encontrada uma quebra
+  de linha ('\n') antes do fechamento.
+
+  Exemplo:
+    MOSTRA["texto sem fechar
+    proxima_linha"]
+
+  Código:
+    case 8:
+        else if (caractere === '\n') {
+            registrarTransicao(8, '\\n', 'ERRO');
+            registrarErro(`String não fechada '${lexema}' — quebra de linha não permitida.`);
+            lexema = "";
+            estado = 1;
+            if (!recuperacao) return { tokens, erros };
+            hasChars = proximoCaractere();
+        }
+
+  Com recuperacao=true:
+    - Descarta a string parcial.
+    - Retorna ao estado q1.
+    - Continua a partir do caractere após '\n' (linha seguinte).
+
+  Com recuperacao=false:
+    - Retorna imediatamente.
+
+--------------------------------------------------------------------------------
+ '@' isolado — comentário mal formado (q11)
+--------------------------------------------------------------------------------
+
+  Ocorre quando: após um '@', o próximo caractere não é outro '@'.
+  Comentários na linguagem Bertol exigem '@@'.
+
+  Exemplo:
+    @ isso não é um comentário
+
+  Código:
+    case 11:
+        if (isComentChar(caractere)) { ... estado = 12; }
+        else {
+            registrarTransicao(11, caractere, 'ERRO');
+            registrarErro(`'@' isolado — use '@@' para comentário.`);
+            lexema = "";
+            estado = 1;
+            if (!recuperacao) return { tokens, erros };
+        }
+
+  Com recuperacao=true:
+    - Descarta o '@'.
+    - Retorna ao estado q1.
+    - O caractere atual é reprocessado em q1.
+
+  Com recuperacao=false:
+    - Retorna imediatamente.
+
+--------------------------------------------------------------------------------
+ '?' isolado — OR mal formado (q16)
+--------------------------------------------------------------------------------
+
+  Ocorre quando: após um '?', o próximo caractere não é outro '?'.
+  O operador OR da linguagem Bertol é '??'.
+
+  Exemplo:
+    SE(a ? b)   <- '?' isolado
+
+  Código:
+    case 16:
+        if (isCharOR(caractere)) { ... }
+        else {
+            registrarTransicao(16, caractere, 'ERRO');
+            registrarErro(`'?' isolado — use '??' para OR.`);
+            lexema = "";
+            estado = 1;
+            if (!recuperacao) return { tokens, erros };
+        }
+
+  Com recuperacao=true:
+    - Descarta o '?'.
+    - Retorna ao estado q1.
+    - O caractere atual é reprocessado.
+
+  Com recuperacao=false:
+    - Retorna imediatamente.
+
+--------------------------------------------------------------------------------
+'$' isolado — AND mal formado (q17)
+--------------------------------------------------------------------------------
+
+  Ocorre quando: após um '$', o próximo caractere não é outro '$'.
+  O operador AND da linguagem Bertol é '$$'.
+
+  Exemplo:
+    SE(a $ b)   <- '$' isolado
+
+  Código:
+    case 17:
+        if (isCharAND(caractere)) { ... }
+        else {
+            registrarTransicao(17, caractere, 'ERRO');
+            registrarErro(`'$' isolado — use '$$' para AND.`);
+            lexema = "";
+            estado = 1;
+            if (!recuperacao) return { tokens, erros };
+        }
+
+  Com recuperacao=true:
+    - Descarta o '$'.
+    - Retorna ao estado q1.
+    - O caractere atual é reprocessado.
+
+  Com recuperacao=false:
+    - Retorna imediatamente.
+
+
+================================================================================
+ CASO ESPECIAL — FIM DE ARQUIVO COM LEXEMA INCOMPLETO
+================================================================================
+
+Ao terminar a varredura, se ainda houver um lexema acumulado (lexema.length > 0),
+o código verifica o estado atual e toma uma decisão:
+
+  Código:
+    if (lexema.length > 0) {
+        const msgs = {
+            8:  `String não fechada: '${lexema}'`,
+            5:  `Número mal formado: '${lexema}'`,
+            11: `'@' isolado.`,
+            16: `'?' isolado.`,
+            17: `'$' isolado.`
+        };
+        if (msgs[estado]) registrarErro(msgs[estado]);
+        else              emitirToken(lexema, linha, coluna);
+    }
+
+  Lógica:
+    - Se o estado final é 8, 5, 11, 16 ou 17: o lexema estava incompleto
+      no fim do arquivo → registra erro.
+    - Para qualquer outro estado (ex: q2 com ID, q4 com inteiro): o lexema
+      é um token válido que só não foi emitido por falta de um caractere
+      separador → emite normalmente.
+
+  Exemplo:
+    x VALE abc      <- sem '#' no final
+    → "abc" chega ao fim do arquivo em q2 → emitido como ID normalmente.
+
+    x VALE "texto   <- string sem fechar, sem '\n', fim do arquivo
+    → estado q8 no fim -> erro "String não fechada: '"texto'".
+

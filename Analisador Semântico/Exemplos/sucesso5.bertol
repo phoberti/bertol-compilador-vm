@@ -1,0 +1,49 @@
+@@ sucesso5.bertol
+@@ Cobre: RS-03 (declaracao com VALE — tipo compativel — OK),
+@@         RS-05 (reatribuicao — tipo compativel — OK),
+@@         RS-06 (variaveis sempre declaradas antes do uso — OK),
+@@         RS-07 (variaveis sempre inicializadas antes do uso — OK)
+
+@@ RS-03: declaracao com VALE — tipo compativel em todos os casos
+x[INTEIRO] VALE 10#
+y[DECIMAL] VALE 2.5#
+msg[TEXTO] VALE "inicio"#
+flag[LOGICO] VALE FALSO#
+
+@@ RS-07: variaveis declaradas COM valor — ja inicializadas — uso imediato OK
+MOSTRA["x inicial: ", x]#
+MOSTRA["y inicial: ", y]#
+
+@@ RS-05: reatribuicao com tipo compativel INTEIRO <- INTEIRO — OK
+x VALE x ADD 5#
+MOSTRA["x apos ADD: ", x]#
+
+@@ RS-05: reatribuicao com tipo compativel DECIMAL <- DECIMAL — OK
+y VALE y MULT 4.0#
+MOSTRA["y apos MULT: ", y]#
+
+@@ RS-05: reatribuicao com tipo compativel TEXTO <- TEXTO — OK
+msg VALE "processando"#
+MOSTRA["msg: ", msg]#
+
+@@ RS-05: reatribuicao com tipo compativel LOGICO <- LOGICO — OK
+flag VALE VERDADEIRO#
+
+@@ RS-06: todas as variaveis usadas abaixo foram declaradas acima — OK
+limite[INTEIRO] VALE 100#
+acumulador[INTEIRO] VALE 0#
+i[INTEIRO]#
+
+PARA i DE 1 ATE limite PASSO 1 {
+    @@ RS-06: 'acumulador', 'i' — ambos declarados — OK
+    @@ RS-07: 'acumulador' inicializado com VALE 0, 'i' inicializado pelo PARA — OK
+    acumulador VALE acumulador ADD i#
+}
+
+@@ RS-07: 'acumulador' foi inicializado antes de chegar aqui — OK
+MOSTRA["Soma 1 a 100: ", acumulador]#
+
+@@ RS-06: 'flag' foi declarado e inicializado — OK
+SE(flag) {
+    MOSTRA["Flag ativa — processamento concluido."]#
+}

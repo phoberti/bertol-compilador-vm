@@ -1,0 +1,8 @@
+@@ Erro 2 — String nao fechada e numero mal formado
+MOSTRA["Ola, mundo]#
+
+preco[DECIMAL]#
+preco VALE 9.#
+
+desconto[DECIMAL]#
+desconto VALE .50#

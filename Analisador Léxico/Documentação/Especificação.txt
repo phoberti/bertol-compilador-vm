@@ -1,0 +1,223 @@
+--------------------------------------------------------------------------------------------------------
+1. Nome da Linguagem: BERTOL
+--------------------------------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------------------------------
+2. Tipos de Dados Primitivos Suportados:
+
+    - int     (INTEIRO)  -> Números inteiros.
+    - float   (DECIMAL)  -> Números reais.
+    - string  (TEXTO)    -> Textos.
+    - boolean (LOGICO)   -> Verdadeiro ou Falso.
+--------------------------------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------------------------------
+3. Operadores Suportados:
+
+    A. Operadores Lógicos:
+        - AND   ($$)
+        - OR    (??)
+        - NOT   (XX)
+
+    B. Operadores Relacionais:
+        - <     (MENOR)
+        - >     (MAIOR)
+        - ==    (IGUAL)
+        - >=    (MAG) 
+        - <=    (MEG)
+        - !=    (DIFERENTE)
+
+    C. Operadores Aritméticos:
+        - +     (ADD)
+        - -     (SUB)
+        - /     (DIV)
+        - *     (MULT)
+        - %     (RESTO)
+--------------------------------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------------------------------
+4. Formação dos Identificadores (Regra para Nomes de Variáveis):
+
+    - Expressão Regular : [a-zA-Z]([a-zA-Z0-9_])*
+    - Tamanho Mínimo    : 1 caractere.
+    - Tamanho Máximo    : 30 caracteres.
+    - Não podem ser palavras reservadas.
+    - Case Sensitive.
+
+    EXEMPLOS:
+        - Declaração              : nomeVariavel[TIPO]#
+        - Declaração e Atribuição : nomeVariavel[TIPO] VALE valor#
+        - Atribuição              : nomeVariavel VALE valor#
+--------------------------------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------------------------------
+5. Comandos de Entrada e Saída:
+
+    - Entrada : RECEBE   -> RECEBE[identificador]#
+    - Saída   : MOSTRA   -> MOSTRA[lista de valores]#
+--------------------------------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------------------------------
+6. Estruturas Suportadas pela Linguagem e seus Respectivos Comandos:
+
+    - Estrutura de Decisão (SE - SENAO):
+
+        SE(condicao) {
+            ...
+        }
+        SENAO {
+            ...
+        }
+
+    - Laço de Repetição Condicional (ENQUANTO):
+
+        ENQUANTO(condicao) {
+            ...
+        }
+
+    - Laço de Repetição Contado (PARA):
+
+        PARA identificador DE inicio ATE fim PASSO valor {
+            ...
+        }
+
+--------------------------------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------------------------------
+7. Palavras Reservadas:
+
+    - Comandos de E/S:
+        1. RECEBE
+        2. MOSTRA
+
+    - Tipos de Dados Primitivos:
+        3. INTEIRO   (int)
+        4. DECIMAL   (float)
+        5. TEXTO     (string)
+        6. LOGICO    (boolean)
+
+    - Operadores Relacionais:
+        7. MENOR     (<)
+        8. MAIOR     (>)
+        9. IGUAL     (==)
+        10. MAG       (>=)
+        11. MEG       (<=)
+        12. DIFERENTE (!=)
+
+    - Operadores Aritméticos:
+        13. ADD     (+)
+        14. SUB     (-)
+        15. DIV     (/)
+        16. MULT    (*)
+        17. RESTO   (%)
+
+    - Estruturas de Controle:
+        18. SE       (if)
+        19. SENAO    (else)
+        20. ENQUANTO (while)
+        21. PARA     (for)
+        22. DE       (início do laço contado)
+        23. ATE      (limite do laço contado)
+        24  VALE     (Atribuição, =)
+        25. PASSO    (incremento do laço contado)
+        26. PARE     (break)
+
+    - Constantes Booleanas:
+        27. VERDADEIRO  (true)
+        28. FALSO       (false)
+--------------------------------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------------------------------
+8. Operadores Simbólicos:
+
+    - Operadores Lógicos:
+        - AND   ($$)
+        - OR    (??)
+        - NOT   (XX)
+
+    - Delimitadores e Símbolos Especiais:
+
+        - @@  (Comentário de Linha)
+        - #   (Delimitar de Fim de Linha)
+--------------------------------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------------------------------
+9. Estrutura Geral do Programa (Sintaxe):
+
+-----------------------------------------------
+EXEMPLO 1: Declaração, entrada, decisão e laço
+-----------------------------------------------
+@@ Declaração de Variáveis
+limite[INTEIRO] VALE 0#
+contador[INTEIRO]#
+
+@@ Entrada e Saída de Dados
+MOSTRA["Informe um valor: "]#
+RECEBE[limite]#
+
+@@ Estrutura Condicional
+SE(limite MAIOR 0){
+
+    @@ Laço de Repeticao Contado
+    PARA contador DE 0 ATE limite PASSO 1 {
+        MOSTRA[contador]#
+    }
+}
+SENAO {
+    MOSTRA["O limite deve ser maior que 0."]#
+}
+
+-----------------------------------------------
+EXEMPLO 2: Expressões aritméticas
+-----------------------------------------------
+numA[INTEIRO]#
+numB[INTEIRO]#
+numC[DECIMAL]#
+resultado[DECIMAL]#
+
+RECEBE[numA]#
+RECEBE[numB]#
+RECEBE[numC]#
+
+@@ Expressão aritmética
+resultado VALE ((numA ADD numB) SUB (numC DIV 2))#
+
+MOSTRA["O resultado vale: ", resultado]#
+
+SE(resultado MAG 0) {
+    MOSTRA["O resultado é maior ou igual a zero."]#
+}
+SENAO {
+    MOSTRA["O resultado é menor que zero."]#
+}
+
+-----------------------------------------------
+EXEMPLO 3: Operadores lógicos e relacionais
+-----------------------------------------------
+resultado[LOGICO]#
+
+@@ Expressão com operadores lógicos e relacionais
+resultado VALE XX(((10 DIFERENTE 10) $$ (5 MENOR 10)) ?? (100 MAIOR 50))#
+
+MOSTRA["O resultado é: ", resultado]#
+
+-----------------------------------------------
+EXEMPLO 4: TOKENS 
+-----------------------------------------------
+@@ Declarando nome do jogador
+nome[TEXTO]#
+RECEBE[nome]#
+
+TOKENS GERADOS:
+    - <COMENTARIO, "Definindo nome do jogador">
+    - <ID, nome>
+    - <[, [>
+    - <TEXTO, TEXTO>
+    - <], ]>
+    - <#, #>
+    - <RECEBE>
+    - <[, [>
+    - <ID, nome>
+    - <], ]>
+    - <#, #>
+--------------------------------------------------------------------------------------------------------

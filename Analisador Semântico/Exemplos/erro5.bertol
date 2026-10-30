@@ -1,0 +1,34 @@
+@@ erro5.bertol
+@@ Cobre: RS-17 (variavel do PARA nao e INTEIRO),
+@@         RS-18 (DE ou PASSO nao e INTEIRO),
+@@         RS-19 (ATE nao e INTEIRO),
+@@         RS-20 (PARE fora de qualquer laco)
+
+@@ RS-20: PARE aparece antes de qualquer laco
+PARE#
+
+fator[DECIMAL] VALE 1.5#
+etapa[TEXTO] VALE "passo"#
+i[INTEIRO]#
+j[DECIMAL] VALE 0.0#
+limite[INTEIRO] VALE 10#
+
+@@ RS-19: ATE deve ser INTEIRO — 'fator' e DECIMAL
+PARA i DE 0 ATE fator PASSO 1 {
+    MOSTRA[i]#
+}
+
+@@ RS-18: DE deve ser INTEIRO — 'fator' e DECIMAL
+PARA i DE fator ATE limite PASSO 1 {
+    MOSTRA[i]#
+}
+
+@@ RS-18: PASSO deve ser INTEIRO — 'fator' e DECIMAL
+PARA i DE 0 ATE limite PASSO fator {
+    MOSTRA[i]#
+}
+
+@@ RS-17: variavel do PARA deve ser INTEIRO — 'j' e DECIMAL
+PARA j DE 0 ATE limite PASSO 1 {
+    MOSTRA[j]#
+}

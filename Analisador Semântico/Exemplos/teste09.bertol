@@ -1,0 +1,51 @@
+@@ TESTE 09 — Máximo, mínimo e média de N números
+@@ Testa: ENQUANTO com RECEBE dentro do laço, SE/SENAO para comparação,
+@@         widening INTEIRO → DECIMAL na média
+@@ TAC esperado: laço com read, condicionais de atualização de max/min
+
+quantidade[INTEIRO]#
+MOSTRA["Quantos numeros? "]#
+RECEBE[quantidade]#
+
+numero[INTEIRO]#
+maximo[INTEIRO]#
+minimo[INTEIRO]#
+soma[INTEIRO] VALE 0#
+media[DECIMAL]#
+
+@@ Lê o primeiro número para inicializar max e min
+MOSTRA["Digite o numero 1: "]#
+RECEBE[numero]#
+maximo VALE numero#
+minimo VALE numero#
+soma VALE soma ADD numero#
+
+@@ Lê os demais
+contador[INTEIRO] VALE 2#
+ENQUANTO(contador MEG quantidade) {
+    MOSTRA["Digite o numero "]#
+    MOSTRA[contador]#
+    MOSTRA[": "]#
+    RECEBE[numero]#
+
+    SE(numero MAIOR maximo) {
+        maximo VALE numero#
+    }
+    SE(numero MENOR minimo) {
+        minimo VALE numero#
+    }
+    soma VALE soma ADD numero#
+    contador VALE contador ADD 1#
+}
+
+@@ Media com widening INTEIRO → DECIMAL
+media VALE soma DIV quantidade#
+
+MOSTRA["Maximo: "]#
+MOSTRA[maximo]#
+MOSTRA["Minimo: "]#
+MOSTRA[minimo]#
+MOSTRA["Soma: "]#
+MOSTRA[soma]#
+MOSTRA["Media: "]#
+MOSTRA[media]#

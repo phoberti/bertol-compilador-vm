@@ -1,0 +1,138 @@
+============================================================
+ANALISADOR SINTÁTICO - LINGUAGEM BERTOL - LL(1) - Análise Top-Down
+============================================================
+
+
+(ESTRUTURA GERAL)
+
+S                   ::= lista_comandos
+
+lista_comandos      ::= comando lista_comandos_cont
+
+lista_comandos_cont ::= comando lista_comandos_cont
+                      | ε
+
+comando             ::= cmd_id
+                      | entrada
+                      | saida
+                      | condicional
+                      | laco_repeticao
+                      | break
+
+
+(FATORAÇÃO DE COMANDOS INICIADOS POR ID)
+
+Os comandos de declaração e atribuição compartilham o
+prefixo ID. Não-terminais auxiliares adiam a decisão:
+
+cmd_id        ::= ID cmd_id_cont
+
+cmd_id_cont   ::= "[" tipo "]" cmd_tipo_cont
+                | VALE expr "#"
+
+cmd_tipo_cont ::= "#"
+                | VALE expr "#"
+
+Assim, os três formatos de comando são cobertos:
+  ID [ tipo ] #             -> declaração simples
+  ID [ tipo ] VALE expr #   -> declaração com atribuição
+  ID VALE expr #            -> reatribuição
+
+
+(ENTRADA E SAÍDA)
+
+entrada  ::= RECEBE "[" ID "]" "#"
+
+saida    ::= MOSTRA "[" lista_valores "]" "#"
+
+lista_valores      ::= valor_saida lista_valores_cont
+
+lista_valores_cont ::= "," lista_valores
+                     | ε
+
+valor_saida ::= STRING
+              | ID
+
+
+(CONDICIONAL)
+
+condicional    ::= SE "(" expr ")" "{" lista_comandos "}" opcional_senao
+
+opcional_senao ::= SENAO "{" lista_comandos "}"
+                 | ε
+
+
+(LAÇOS DE REPETIÇÃO)
+
+laco_repeticao ::= laco_enquanto
+                 | laco_para
+
+laco_enquanto  ::= ENQUANTO "(" expr ")" "{" lista_comandos "}"
+
+laco_para      ::= PARA ID DE valor_for ATE expr PASSO valor_for
+                   "{" lista_comandos "}"
+
+valor_for      ::= NUM_INT | NUM_REAL | ID
+
+
+(BREAK)
+
+break ::= PARE "#"
+
+
+(VALORES E TIPOS)
+
+valor ::= NUM_INT | NUM_REAL | STRING | BOOLEAN | ID
+
+tipo  ::= INTEIRO | DECIMAL | TEXTO | LOGICO
+
+
+(EXPRESSÕES)
+
+expr      ::= term expr_tail
+
+expr_tail ::= binop term expr_tail
+            | ε
+
+binop ::= "??" | "$$"
+        | MENOR | MAIOR | IGUAL | MAG | MEG | DIFERENTE
+        | ADD | SUB | MULT | DIV | RESTO
+
+term  ::= XX term
+        | "(" expr ")"
+        | valor
+
+
+
+lista_comandos_cont:
+  P2: FIRST(comando lista_comandos_cont)
+    = FIRST(comando) = { ID, RECEBE, MOSTRA, SE, ENQUANTO, PARA, PARE }
+  P3: ε -> FOLLOW(lista_comandos_cont) = { $, } }
+ 
+
+cmd_id_cont:
+  P11: FIRST( "[" ... ) = { "[" }
+  P12: FIRST( VALE ... ) = { VALE }
+
+
+cmd_tipo_cont:
+  P13: FIRST( "#" ) = { "#" }
+  P14: FIRST( VALE ... ) = { VALE }
+
+
+lista_valores_cont:
+  P18: FIRST( "," ... ) = { "," }
+  P19: ε -> FOLLOW(lista_valores_cont) = { "]" }
+
+opcional_senao:
+  P23: FIRST( SENAO ... ) = { SENAO }
+  P24: ε -> FOLLOW(opcional_senao) = { ID, RECEBE, MOSTRA,
+       SE, ENQUANTO, PARA, PARE, $, } }
+
+
+expr_tail:
+  P43: FIRST(binop) = { ??, $$, MENOR, MAIOR, IGUAL, MAG,
+       MEG, DIFERENTE, ADD, SUB, MULT, DIV, RESTO }
+  P44: ε -> FOLLOW(expr_tail) = { #, ), PASSO }
+
+

@@ -1,0 +1,85 @@
+============================================================
+GRAMÁTICA Linguagem Bertol — LL(1)
+============================================================
+
+1)  lista_comandos      -> comando lista_comandos_cont
+
+2)  lista_comandos_cont -> comando lista_comandos_cont
+3)  lista_comandos_cont -> ε
+
+4)  comando             -> cmd_id
+5)  comando             -> entrada
+6)  comando             -> saida
+7)  comando             -> condicional
+8)  comando             -> laco_repeticao
+9)  comando             -> break
+
+10) cmd_id              -> ID cmd_id_cont
+
+11) cmd_id_cont         -> "[" tipo "]" cmd_tipo_cont
+12) cmd_id_cont         -> VALE expr "#"
+
+13) cmd_tipo_cont       -> "#"
+14) cmd_tipo_cont       -> VALE expr "#"
+
+15) entrada             -> RECEBE "[" ID "]" "#"
+16) saida               -> MOSTRA "[" lista_valores "]" "#"
+
+17) lista_valores       -> valor_saida lista_valores_cont
+18) lista_valores_cont  -> "," lista_valores
+19) lista_valores_cont  -> ε
+
+20) valor_saida         -> STRING
+21) valor_saida         -> ID
+
+22) condicional         -> SE "(" expr ")" "{" lista_comandos "}" opcional_senao
+23) opcional_senao      -> SENAO "{" lista_comandos "}"
+24) opcional_senao      -> ε
+
+25) laco_repeticao      -> laco_enquanto
+26) laco_repeticao      -> laco_para
+
+27) laco_enquanto       -> ENQUANTO "(" expr ")" "{" lista_comandos "}"
+28) laco_para           -> PARA ID DE valor_for ATE expr PASSO valor_for "{" lista_comandos "}"
+
+29) valor_for           -> NUM_INT
+30) valor_for           -> NUM_REAL
+31) valor_for           -> ID
+
+32) break               -> PARE "#"
+
+33) valor               -> NUM_INT
+34) valor               -> NUM_REAL
+35) valor               -> STRING
+36) valor               -> BOOLEAN
+37) valor               -> ID
+
+38) tipo                -> INTEIRO
+39) tipo                -> DECIMAL
+40) tipo                -> TEXTO
+41) tipo                -> LOGICO
+
+42) expr                -> term expr_tail
+
+43) expr_tail           -> binop term expr_tail
+44) expr_tail           -> ε
+
+45) binop               -> "??"
+46) binop               -> "$$"
+47) binop               -> MENOR
+48) binop               -> MAIOR
+49) binop               -> IGUAL
+50) binop               -> MAG
+51) binop               -> MEG
+52) binop               -> DIFERENTE
+53) binop               -> ADD
+54) binop               -> SUB
+55) binop               -> MULT
+56) binop               -> DIV
+57) binop               -> RESTO
+
+58) term                -> XX term
+59) term                -> "(" expr ")"
+60) term                -> valor
+
+============================================================

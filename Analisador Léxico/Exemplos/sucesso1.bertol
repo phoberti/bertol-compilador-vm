@@ -1,0 +1,15 @@
+@@ Teste 1 — Declaracoes e atribuicoes simples
+nome[TEXTO]#
+idade[INTEIRO]#
+salario[DECIMAL]#
+ativo[LOGICO]#
+
+nome VALE "Pedro Berti"#
+idade VALE 28#
+salario VALE 3500.75#
+ativo VALE VERDADEIRO#
+
+MOSTRA["Nome: ", nome]#
+MOSTRA["Idade: ", idade]#
+MOSTRA["Salario: ", salario]#
+MOSTRA["Ativo: ", ativo]#

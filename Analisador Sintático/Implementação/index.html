@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bertol — Compilador</title>
+    <link rel="icon" type="image/png" href="bthumb.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrapper">
+
+    <header>
+        <img src="bthumb.png" class="logo-img" alt="Bertol">
+        <div class="header-text">
+            <h1>Bertol</h1>
+            <p>Analisador Léxico e Sintático</p>
+        </div>
+    </header>
+
+    <div class="panel">
+        <div class="panel-header">
+            Código-Fonte Bertol
+        </div>
+        <textarea id="editor" spellcheck="false">@@ Exemplo completo — linguagem Bertol
+limite[INTEIRO] VALE 0#
+contador[INTEIRO]#
+
+MOSTRA["Informe um valor: "]#
+RECEBE[limite]#
+
+SE(limite MAIOR 0) {
+    PARA contador DE 0 ATE limite PASSO 1 {
+        MOSTRA[contador]#
+    }
+}
+SENAO {
+    MOSTRA["O limite deve ser maior que 0."]#
+}
+
+@@ Expressao aritmetica
+resultado[DECIMAL]#
+resultado VALE ((3 ADD 2) SUB (10 DIV 5))#
+MOSTRA["Resultado: ", resultado]#
+
+@@ Operadores logicos
+flag[LOGICO]#
+flag VALE XX((10 DIFERENTE 10) $$ VERDADEIRO)#
+MOSTRA["Flag: ", flag]#
+</textarea>
+        <div class="toolbar">
+            <label class="btn btn-load" for="file-input"> Carregar Arquivo</label>
+            <input type="file" id="file-input" accept=".txt,.bertol">
+
+            <div class="toolbar-sep"></div>
+
+            <!-- Dropdown: Análise Léxica -->
+            <div class="dropdown" id="dropdown-lexico">
+                <button class="btn btn-primary" id="btn-lexico-toggle">
+                     Análise Léxica <span class="dropdown-arrow">▾</span>
+                </button>
+                <div class="dropdown-menu" id="menu-lexico">
+                    <div class="dropdown-label">Modo do analisador léxico</div>
+                    <button class="dropdown-item" data-lexico="normal">
+                        <span class="item-icon"></span>
+                        <span>
+                            <strong>Normal</strong>
+                            <small>Para no primeiro erro encontrado</small>
+                        </span>
+                    </button>
+                    <button class="dropdown-item" data-lexico="recuperacao">
+                        <span class="item-icon"></span>
+                        <span>
+                            <strong>Com Recuperação</strong>
+                            <small>Continua após erros, reporta todos</small>
+                        </span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dropdown: Análise Sintática -->
+            <div class="dropdown" id="dropdown-sint">
+                <button class="btn btn-sintax" id="btn-sint-toggle">
+                     Análise Sintática <span class="dropdown-arrow">▾</span>
+                </button>
+                <div class="dropdown-menu" id="menu-sint">
+                    <div class="dropdown-label">Método de análise</div>
+                    <button class="dropdown-item sint-opt" data-lexico="normal" data-sint="normal" data-metodo="SLR">
+                        <span class="item-icon"></span>
+                        <span><strong>SLR</strong></span>
+                    </button>
+                    <button class="dropdown-item sint-opt" data-lexico="normal" data-sint="normal" data-metodo="LL(1)">
+                        <span class="item-icon"></span>
+                        <span><strong>LL(1)</strong></span>
+                    </button>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item" id="mais-opcoes-trigger">
+                        <span class="item-icon"></span>
+                        <span><strong>Mais Opções</strong></span>
+                        <span class="submenu-arrow">▶</span>
+                    </button>
+                </div>
+                <!-- Submenu Mais Opções -->
+                <div class="dropdown-menu dropdown-mais" id="submenu-mais">
+                    <div class="dropdown-label">SLR</div>
+                    <button class="dropdown-item sint-opt" data-lexico="normal" data-sint="recuperacao" data-metodo="SLR">
+                        <span class="item-icon"></span>
+                        <span>Léxico normal, Sintático c/ recuperação</span>
+                    </button>
+                    <button class="dropdown-item sint-opt" data-lexico="recuperacao" data-sint="normal" data-metodo="SLR">
+                        <span class="item-icon"></span>
+                        <span>Léxico c/ recuperação, Sintático normal</span>
+                    </button>
+                    <button class="dropdown-item sint-opt" data-lexico="recuperacao" data-sint="recuperacao" data-metodo="SLR">
+                        <span class="item-icon"></span>
+                        <span>Léxico c/ recuperação, Sintático c/ recuperação</span>
+                    </button>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-label">LL(1)</div>
+                    <button class="dropdown-item sint-opt" data-lexico="normal" data-sint="recuperacao" data-metodo="LL(1)">
+                        <span class="item-icon"></span>
+                        <span>Léxico normal, Sintático c/ recuperação</span>
+                    </button>
+                    <button class="dropdown-item sint-opt" data-lexico="recuperacao" data-sint="normal" data-metodo="LL(1)">
+                        <span class="item-icon"></span>
+                        <span>Léxico c/ recuperação, Sintático normal</span>
+                    </button>
+                    <button class="dropdown-item sint-opt" data-lexico="recuperacao" data-sint="recuperacao" data-metodo="LL(1)">
+                        <span class="item-icon"></span>
+                        <span>Léxico c/ recuperação, Sintático c/ recuperação</span>
+                    </button>
+                </div>
+            </div>
+
+            <button class="btn btn-secondary" id="btn-limpar"> Limpar</button>
+
+            <span class="spacer"></span>
+            <span class="stats" id="stats"></span>
+        </div>
+    </div>
+
+    <div class="panel" id="output-panel" style="display:none">
+        <div class="tabs">
+            <div class="tab active" data-tab="tokens">Tokens</div>
+            <div class="tab" data-tab="sintatico" id="tab-btn-sintatico">Sintático</div>
+            <div class="tab" data-tab="erros">Erros &amp; Avisos</div>
+        </div>
+
+        <div id="tab-tokens">
+            <div class="summary" id="summary"></div>
+            <div class="token-table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="td-num">#</th>
+                            <th>Token</th>
+                            <th>Lexema</th>
+                            <th>Linha</th>
+                            <th class="td-expand"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="token-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="tab-sintatico" style="display:none">
+            <div id="sint-summary" class="summary"></div>
+            <div class="token-table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:50px">Passo</th>
+                            <th style="width:280px">Pilha</th>
+                            <th style="width:260px">Buffer</th>
+                            <th>Ação</th>
+                            <th style="width:40px"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="sint-traj-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="tab-erros" style="display:none">
+            <div class="msg-block" id="erros-body"></div>
+        </div>
+    </div>
+
+</div>
+<script src="script.js"></script>
+</body>
+</html>

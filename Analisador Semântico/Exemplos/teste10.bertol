@@ -1,0 +1,55 @@
+@@ TESTE 10 — Fibonacci e verificação de número primo
+@@ Testa: múltiplos laços, PARE dentro de ENQUANTO, variáveis auxiliares,
+@@         condições compostas com $$ e ??, LOGICO como flag de controle
+@@ TAC esperado: laços corretos, saltos de PARE para Lfim do laço correto
+
+@@ Fibonacci: primeiros N termos
+MOSTRA["Quantos termos de Fibonacci? "]#
+n[INTEIRO]#
+RECEBE[n]#
+
+ant[INTEIRO] VALE 0#
+atu[INTEIRO] VALE 1#
+aux[INTEIRO]#
+cont[INTEIRO] VALE 1#
+
+MOSTRA["Fibonacci: "]#
+MOSTRA[ant]#
+ENQUANTO(cont MEG n) {
+    MOSTRA[atu]#
+    aux VALE ant ADD atu#
+    ant VALE atu#
+    atu VALE aux#
+    cont VALE cont ADD 1#
+}
+
+@@ Verificação de primo
+MOSTRA["Digite um numero para verificar se e primo: "]#
+num[INTEIRO]#
+RECEBE[num]#
+
+primo[LOGICO] VALE VERDADEIRO#
+div[INTEIRO] VALE 2#
+
+SE(num MEG 2) {
+    ENQUANTO(primo $$ (div MENOR num)) {
+        resto[INTEIRO]#
+        resto VALE num RESTO div#
+        SE(resto IGUAL 0) {
+            primo VALE FALSO#
+        }
+        div VALE div ADD 1#
+    }
+}
+SENAO {
+    primo VALE FALSO#
+}
+
+SE(primo) {
+    MOSTRA[num]#
+    MOSTRA[" e primo"]#
+}
+SENAO {
+    MOSTRA[num]#
+    MOSTRA[" nao e primo"]#
+}

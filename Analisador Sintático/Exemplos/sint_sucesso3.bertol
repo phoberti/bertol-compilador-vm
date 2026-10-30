@@ -1,0 +1,21 @@
+@@ Teste Sintático 3 — PARA e expressões complexas
+contador[INTEIRO]#
+resultado[INTEIRO]#
+flag[LOGICO]#
+
+resultado VALE 0#
+
+@@ Laco contado
+PARA contador DE 1 ATE 10 PASSO 1 {
+    resultado VALE resultado ADD contador#
+    MOSTRA["Soma parcial: ", resultado]#
+}
+
+@@ Expressão com operadores logicos e relacionais
+flag VALE XX((resultado MAIOR 50) $$ (contador IGUAL 10))#
+MOSTRA["Flag: ", flag]#
+
+@@ SE sem SENAO
+SE(resultado MAIOR 0) {
+    MOSTRA["Resultado positivo: ", resultado]#
+}

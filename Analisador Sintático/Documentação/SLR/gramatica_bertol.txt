@@ -1,0 +1,101 @@
+------------------------------------------------------------
+GRAMÁTICA DA LINGUAGEM BERTOL - GLC (E-BNF)
+------------------------------------------------------------
+
+(ESTRUTURA GERAL)
+S ::= lista_comandos
+
+lista_comandos ::= comando lista_comandos
+                 | comando
+
+comando ::= declaracao
+          | atribuicao
+          | entrada
+          | saida
+          | condicional
+          | laco_repeticao
+          | break
+
+
+(DECLARAÇÃO E ATRIBUIÇÃO)
+
+declaracao ::= ID "[" tipo "]" "#"
+
+atribuicao ::= ID "[" tipo "]" VALE expr "#"
+             | ID VALE expr "#"
+
+
+(ENTRADA E SAÍDA)
+
+entrada ::= RECEBE "[" ID "]" "#"
+
+saida ::= MOSTRA "[" lista_valores "]" "#"
+
+lista_valores ::= valor_saida
+                | valor_saida "," lista_valores
+
+valor_saida ::= STRING
+              | ID
+
+
+(CONDICIONAL)
+
+condicional ::= SE "(" expr ")" "{" lista_comandos "}" opcional_senao
+
+opcional_senao ::= SENAO "{" lista_comandos "}"
+                 | ε
+
+
+(LAÇOS DE REPETIÇÃO)
+
+laco_repeticao ::= laco_enquanto
+                 | laco_para
+
+laco_enquanto ::= ENQUANTO "(" expr ")" "{" lista_comandos "}"
+
+laco_para ::= PARA ID DE valor_for ATE expr PASSO valor_for "{" lista_comandos "}"
+
+valor_for ::= NUM_INT
+            | NUM_REAL
+            | ID
+
+
+(BREAK)
+
+break ::= PARE "#"
+
+
+(VALORES)
+
+valor ::= NUM_INT
+        | NUM_REAL
+        | STRING
+        | BOOLEAN
+        | ID
+
+
+(TIPOS)
+
+tipo ::= INTEIRO
+       | DECIMAL
+       | TEXTO
+       | LOGICO
+
+
+(EXPRESSÕES — sem precedência sintática, tratada na semântica)
+
+expr      ::= term expr_tail
+
+expr_tail ::= binop term expr_tail
+            | ε
+
+binop ::= "??"                                          /* OR  */
+        | "$$"                                          /* AND */
+        | MENOR | MAIOR | IGUAL | MAG | MEG | DIFERENTE /* relacionais */
+        | ADD   | SUB                                   /* aditivos    */
+        | MULT  | DIV  | RESTO                          /* multiplicativos */
+
+term  ::= XX term          /* NOT unário */
+        | "(" expr ")"     /* agrupamento */
+        | valor
+------------------------------------------------------------

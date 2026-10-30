@@ -1,0 +1,56 @@
+@@ sucesso1.bertol
+@@ Cobre: RS-01 (declaracoes unicas de todos os tipos),
+@@         RS-13 (inferencia aritmetica: INTEIRO op INTEIRO = INTEIRO, com DECIMAL = DECIMAL),
+@@         RS-14 (inferencia relacional e logica = LOGICO)
+
+@@ Declaracoes unicas de cada tipo primitivo (RS-01: sem duplicata)
+idade[INTEIRO] VALE 25#
+salario[DECIMAL] VALE 3500.50#
+nome[TEXTO] VALE "Ana"#
+ativo[LOGICO] VALE VERDADEIRO#
+
+@@ RS-13: INTEIRO ADD INTEIRO = INTEIRO
+bonus[INTEIRO] VALE 500#
+totalInt[INTEIRO]#
+totalInt VALE idade ADD bonus#
+
+@@ RS-13: DECIMAL SUB DECIMAL = DECIMAL
+desconto[DECIMAL] VALE 100.25#
+totalDec[DECIMAL]#
+totalDec VALE salario SUB desconto#
+
+@@ RS-13: INTEIRO MULT INTEIRO = INTEIRO
+dobro[INTEIRO]#
+dobro VALE bonus MULT 2#
+
+@@ RS-13: DECIMAL DIV DECIMAL = DECIMAL
+metade[DECIMAL]#
+metade VALE salario DIV 2.0#
+
+@@ RS-13: INTEIRO RESTO INTEIRO = INTEIRO
+resto[INTEIRO]#
+resto VALE idade RESTO 7#
+
+@@ RS-14: operador MAIOR produz LOGICO
+maiorIdade[LOGICO]#
+maiorIdade VALE idade MAIOR 18#
+
+@@ RS-14: operador MAG produz LOGICO
+salarioOk[LOGICO]#
+salarioOk VALE salario MAG 3000.0#
+
+@@ RS-14: operador MEG produz LOGICO
+jovenOuMedio[LOGICO]#
+jovenOuMedio VALE idade MEG 60#
+
+@@ Exibe todos os resultados
+MOSTRA["Nome: ", nome]#
+MOSTRA["Idade: ", idade]#
+MOSTRA["Total inteiro: ", totalInt]#
+MOSTRA["Total decimal: ", totalDec]#
+MOSTRA["Dobro do bonus: ", dobro]#
+MOSTRA["Metade do salario: ", metade]#
+MOSTRA["Resto idade/7: ", resto]#
+MOSTRA["Maior de idade: ", maiorIdade]#
+MOSTRA["Salario ok: ", salarioOk]#
+MOSTRA["Jovem ou medio: ", jovenOuMedio]#

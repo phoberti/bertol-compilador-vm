@@ -1,0 +1,380 @@
+================================================================================
+  LINGUAGEM BERTOL - ACOES SEMANTICAS POR PRODUCAO
+================================================================================
+
+  Precedencia dos operadores:
+    1 -- Logicos binarios: $$  ??
+    2 -- Relacionais:      MAIOR  MENOR  MAG  MEG  IGUAL  DIFERENTE
+    3 -- Aritmeticos:      ADD  SUB  MULT  DIV  RESTO
+
+================================================================================
+DECLARACOES
+================================================================================
+
+--------------------------------------------------------------------------------
+P01 | declaracao -> ID [ tipo ] #
+--------------------------------------------------------------------------------
+Gramatica (SLR prod. 10 / LL(1) cmd_tipo_cont -> #):
+
+  SE buscar(ID.lexema) != NULL:
+      ERRO("Variavel '" + ID.lexema + "' ja declarada na linha "
+           + TS[ID.lexema].linha_decl)                              @@ RS-01
+  SENAO:
+      inserir(ID.lexema, tipo.val, ID.linha)
+      @@ inicializado <- false por padrao
+
+--------------------------------------------------------------------------------
+P02 | declaracao -> ID [ tipo ] VALE expr #
+--------------------------------------------------------------------------------
+Gramatica (SLR prod. 11 / LL(1) cmd_tipo_cont -> VALE expr #):
+
+  SE buscar(ID.lexema) != NULL:
+      ERRO("Variavel '" + ID.lexema + "' ja declarada na linha "
+           + TS[ID.lexema].linha_decl)                              @@ RS-01
+  SENAO:
+      inserir(ID.lexema, tipo.val, ID.linha)
+      SE tipo(expr) != tipo.val:
+          ERRO("Tipo incompativel: esperado " + tipo.val
+               + ", encontrado " + tipo(expr))                      @@ RS-03
+      SENAO:
+          atualizar(ID.lexema, inicializado <- true)
+
+--------------------------------------------------------------------------------
+P03 | atribuicao -> ID VALE expr #
+--------------------------------------------------------------------------------
+Gramatica (SLR prod. 12 / LL(1) cmd_id_cont -> VALE expr #):
+
+  SE buscar(ID.lexema) = NULL:
+      ERRO("Variavel '" + ID.lexema + "' nao declarada")            @@ RS-04
+  SENAO:
+      SE tipo(expr) != TS[ID.lexema].tipo:
+          ERRO("Tipo incompativel: variavel '" + ID.lexema
+               + "' e " + TS[ID.lexema].tipo
+               + ", expressao e " + tipo(expr))                     @@ RS-05
+      SENAO:
+          atualizar(ID.lexema, inicializado <- true)
+
+
+================================================================================
+ENTRADA E SAIDA
+================================================================================
+
+--------------------------------------------------------------------------------
+P04 | entrada -> RECEBE [ ID ] #
+--------------------------------------------------------------------------------
+Gramatica (SLR prod. 13 / LL(1) entrada -> RECEBE [ ID ] #):
+
+  SE buscar(ID.lexema) = NULL:
+      ERRO("Variavel '" + ID.lexema + "' nao declarada")            @@ RS-21
+  SENAO:
+      atualizar(ID.lexema, inicializado <- true)
+      @@ RECEBE sempre inicializa -- o valor vem do usuario em tempo de execucao
+
+--------------------------------------------------------------------------------
+P05 | saida -> MOSTRA [ lista_valores ] #
+--------------------------------------------------------------------------------
+Gramatica (SLR prod. 14 / LL(1) saida -> MOSTRA [ lista_valores ] #):
+
+  @@ A verificacao e feita em cada valor_saida individualmente (ver P06/P07)
+  @@ Nenhuma acao adicional nesta producao
+
+--------------------------------------------------------------------------------
+P06 | valor_saida -> STRING
+--------------------------------------------------------------------------------
+Gramatica (SLR prod. 17 / LL(1) valor_saida -> STRING):
+
+  @@ STRING literal e sempre valido -- nenhuma verificacao necessaria
+  tipo(valor_saida) <- TEXTO
+
+--------------------------------------------------------------------------------
+P07 | valor_saida -> ID
+--------------------------------------------------------------------------------
+Gramatica (SLR prod. 18 / LL(1) valor_saida -> ID):
+
+  SE buscar(ID.lexema) = NULL:
+      ERRO("Variavel '" + ID.lexema + "' nao declarada em MOSTRA")  @@ RS-22
+  SENAO:
+      tipo(valor_saida) <- TS[ID.lexema].tipo
+      @@ Qualquer tipo e aceito no MOSTRA -- sem restricao de tipo aqui
+
+
+================================================================================
+EXPRESSOES
+================================================================================
+
+--------------------------------------------------------------------------------
+P08 | expr -> term expr_tail
+--------------------------------------------------------------------------------
+Gramatica (SLR prod. 39 / LL(1) expr -> term expr_tail):
+
+  @@ A inferencia usa descida recursiva sobre a lista de tokens da expressao:
+  @@   1. Remove parenteses externos se a expressao inteira estiver envolvida
+  @@   2. Localiza o operador de MENOR precedencia fora de parenteses
+  @@   3. Avalia lado esquerdo e direito recursivamente (P08 aplicado a cada lado)
+  @@   4. Aplica a regra do operador encontrado (P09)
+  @@
+  @@ Exemplos de avaliacao recursiva:
+  @@   (n RESTO 2) IGUAL 0
+  @@     -> lado esq: inferir(n RESTO 2) = INTEIRO  (P09/ARIT)
+  @@     -> operador: IGUAL
+  @@     -> lado dir: inferir(0) = INTEIRO
+  @@     -> resultado: LOGICO  (P09/REL_EQ, RS-14)
+  @@
+  @@   primo $$ (div MENOR num)
+  @@     -> lado esq: inferir(primo) = LOGICO
+  @@     -> operador: $$
+  @@     -> lado dir: inferir(div MENOR num) = LOGICO  (P09/REL_NUM, RS-14)
+  @@     -> resultado: LOGICO  (P09/LOG, RS-11 ok, RS-14)
+
+  tipo(expr) <- inferir(tokens_da_expressao)
+
+--------------------------------------------------------------------------------
+P09 | expr_tail -> binop term expr_tail
+--------------------------------------------------------------------------------
+Gramatica (SLR prod. 40 / LL(1) expr_tail -> binop term expr_tail):
+
+  @@ tEsq e tDir sao os tipos inferidos recursivamente para cada lado do operador.
+
+  SE binop.categoria = ARIT:
+      SE tEsq nao pertence a {INTEIRO, DECIMAL}:
+          ERRO("Operador aritmetico aplicado a tipo " + tEsq)        @@ RS-08
+      SE tDir nao pertence a {INTEIRO, DECIMAL}:
+          ERRO("Operador aritmetico aplicado a tipo " + tDir)        @@ RS-08
+      SE tEsq = DECIMAL OU tDir = DECIMAL:
+          tipo <- DECIMAL                                             @@ RS-13
+      SENAO:
+          tipo <- INTEIRO                                             @@ RS-13
+
+  SE binop.categoria = REL_NUMERICO:  @@ MAIOR, MENOR, MAG, MEG
+      SE tEsq nao pertence a {INTEIRO, DECIMAL}:
+          ERRO("Operador relacional numerico aplicado a tipo " + tEsq) @@ RS-09
+      SE tDir nao pertence a {INTEIRO, DECIMAL}:
+          ERRO("Operador relacional numerico aplicado a tipo " + tDir) @@ RS-09
+      @@ Comparacao mista INTEIRO/DECIMAL e aceita (v1.1)
+      tipo <- LOGICO                                                  @@ RS-14
+
+  SE binop.op = IGUAL OU binop.op = DIFERENTE:
+      val numericos = {INTEIRO, DECIMAL}
+      SE tEsq != tDir
+         E NOT (tEsq pertence a numericos E tDir pertence a numericos):
+          ERRO("Tipos diferentes em comparacao de igualdade: "
+               + tEsq + " e " + tDir)                               @@ RS-10
+      tipo <- LOGICO                                                  @@ RS-14
+
+  SE binop.categoria = LOG:  @@ $$ e ??
+      SE tEsq != LOGICO:
+          ERRO("Operador logico aplicado a tipo nao-LOGICO: " + tEsq) @@ RS-11
+      SE tDir != LOGICO:
+          ERRO("Operador logico aplicado a tipo nao-LOGICO: " + tDir) @@ RS-11
+      tipo <- LOGICO                                                  @@ RS-14
+
+--------------------------------------------------------------------------------
+P10 | expr_tail -> epsilon
+--------------------------------------------------------------------------------
+Gramatica (SLR prod. 41 / LL(1) expr_tail -> epsilon):
+
+  tipo(expr_tail) <- NULL   @@ sem operador -- expr_tail nao altera o tipo
+
+--------------------------------------------------------------------------------
+P11 | term -> XX term
+--------------------------------------------------------------------------------
+Gramatica (SLR prod. 55 / LL(1) term -> XX term):
+
+  @@ O operando interno e inferido recursivamente antes de verificar o tipo.
+  SE tipo(term_interno) != LOGICO:
+      ERRO("Operador XX aplicado a tipo nao-LOGICO: "
+           + tipo(term_interno))                                     @@ RS-12
+  tipo(term) <- LOGICO                                               @@ RS-14
+
+--------------------------------------------------------------------------------
+P12 | term -> ( expr )
+--------------------------------------------------------------------------------
+Gramatica (SLR prod. 56 / LL(1) term -> ( expr ) ):
+
+  tipo(term) <- inferir(tokens_internos)
+  @@ Parenteses agrupam e propagam o tipo da subexpressao interna.
+  @@ O algoritmo remove os parenteses externos e reavalia recursivamente,
+  @@ garantindo que (n RESTO 2) produza INTEIRO antes de ser usado como
+  @@ operando de IGUAL, $$ ou qualquer outro operador externo.
+
+--------------------------------------------------------------------------------
+P13 | term -> valor
+--------------------------------------------------------------------------------
+Gramatica (SLR prod. 57 / LL(1) term -> valor):
+
+  tipo(term) <- tipo(valor)
+
+--------------------------------------------------------------------------------
+P14 | valor -> NUM_INT
+--------------------------------------------------------------------------------
+  tipo(valor) <- INTEIRO
+
+--------------------------------------------------------------------------------
+P15 | valor -> NUM_REAL
+--------------------------------------------------------------------------------
+  tipo(valor) <- DECIMAL
+
+--------------------------------------------------------------------------------
+P16 | valor -> STRING
+--------------------------------------------------------------------------------
+  tipo(valor) <- TEXTO
+
+--------------------------------------------------------------------------------
+P17 | valor -> BOOLEAN   (VERDADEIRO | FALSO)
+--------------------------------------------------------------------------------
+  tipo(valor) <- LOGICO
+
+--------------------------------------------------------------------------------
+P18 | valor -> ID
+--------------------------------------------------------------------------------
+  SE buscar(ID.lexema) = NULL:
+      ERRO("Variavel '" + ID.lexema + "' nao declarada")            @@ RS-06
+  SENAO SE TS[ID.lexema].inicializado = false:
+      ERRO("Variavel '" + ID.lexema
+           + "' usada antes de ser inicializada")                   @@ RS-07
+  SENAO:
+      tipo(valor) <- TS[ID.lexema].tipo
+
+
+================================================================================
+TIPOS
+================================================================================
+
+As producoes de tipo apenas propagam o valor do tipo declarado.
+Nenhuma verificacao semantica adicional -- o sintatico ja garante que apenas
+INTEIRO, DECIMAL, TEXTO e LOGICO sao aceitos.
+
+--------------------------------------------------------------------------------
+P19 | tipo -> INTEIRO
+P20 | tipo -> DECIMAL
+P21 | tipo -> TEXTO
+P22 | tipo -> LOGICO
+--------------------------------------------------------------------------------
+  tipo.val <- token.lexema   @@ "INTEIRO" | "DECIMAL" | "TEXTO" | "LOGICO"
+
+
+================================================================================
+CONDICIONAL
+================================================================================
+
+--------------------------------------------------------------------------------
+P23 | condicional -> SE ( expr ) { lista_comandos } opcional_senao
+--------------------------------------------------------------------------------
+Gramatica (SLR prod. 19 / LL(1) condicional -> SE ( expr ) { lista_comandos } opcional_senao):
+
+  SE tipo(expr) != LOGICO:
+      ERRO("Condicao do SE deve ser LOGICO, encontrado "
+           + tipo(expr))                                            @@ RS-15
+
+--------------------------------------------------------------------------------
+P24 | opcional_senao -> SENAO { lista_comandos }
+--------------------------------------------------------------------------------
+Gramatica (SLR prod. 20 / LL(1) opcional_senao -> SENAO { lista_comandos }):
+
+  @@ Nenhuma verificacao semantica -- SENAO apenas delimita bloco alternativo
+
+--------------------------------------------------------------------------------
+P25 | opcional_senao -> epsilon
+--------------------------------------------------------------------------------
+  @@ Nenhuma acao
+
+
+================================================================================
+LACOS
+================================================================================
+
+--------------------------------------------------------------------------------
+P26 | laco_enquanto -> ENQUANTO ( expr ) { lista_comandos }
+--------------------------------------------------------------------------------
+Gramatica (SLR prod. 24 / LL(1) laco_enquanto -> ENQUANTO ( expr ) { lista_comandos }):
+
+  @@ Ao entrar no laco:
+  profundidade_laco <- profundidade_laco + 1
+
+  SE tipo(expr) != LOGICO:
+      ERRO("Condicao do ENQUANTO deve ser LOGICO, encontrado "
+           + tipo(expr))                                            @@ RS-16
+
+  @@ Ao sair do laco (apos lista_comandos):
+  profundidade_laco <- profundidade_laco - 1
+
+--------------------------------------------------------------------------------
+P27 | laco_para -> PARA ID DE valor_for ATE expr PASSO valor_for { lista_comandos }
+--------------------------------------------------------------------------------
+Gramatica (SLR prod. 25 / LL(1) laco_para -> PARA ID DE valor_for ATE expr PASSO valor_for { lista_comandos }):
+
+  @@ Ao entrar no laco:
+  profundidade_laco <- profundidade_laco + 1
+
+  SE buscar(ID.lexema) = NULL:
+      ERRO("Variavel '" + ID.lexema + "' nao declarada")            @@ RS-04
+  SENAO SE TS[ID.lexema].tipo != INTEIRO:
+      ERRO("Variavel do PARA deve ser INTEIRO, encontrado "
+           + TS[ID.lexema].tipo)                                    @@ RS-17
+
+  SE tipo(valor_for_DE) != INTEIRO:
+      ERRO("Valor de DE deve ser INTEIRO, encontrado "
+           + tipo(valor_for_DE))                                    @@ RS-18
+
+  SE tipo(expr_ATE) != INTEIRO:
+      ERRO("Valor de ATE deve ser INTEIRO, encontrado "
+           + tipo(expr_ATE))                                        @@ RS-19
+
+  SE tipo(valor_for_PASSO) != INTEIRO:
+      ERRO("Valor de PASSO deve ser INTEIRO, encontrado "
+           + tipo(valor_for_PASSO))                                 @@ RS-18
+
+  @@ Ao sair do laco:
+  profundidade_laco <- profundidade_laco - 1
+
+--------------------------------------------------------------------------------
+P28 | valor_for -> NUM_INT
+P29 | valor_for -> NUM_REAL
+P30 | valor_for -> ID
+--------------------------------------------------------------------------------
+  @@ valor_for e uma versao restrita de valor usada no PARA
+  @@ A verificacao de tipo e feita em P27 -- aqui apenas propagamos o tipo
+
+  P28: tipo(valor_for) <- INTEIRO
+  P29: tipo(valor_for) <- DECIMAL
+  P30:
+      SE buscar(ID.lexema) = NULL:
+          ERRO("Variavel '" + ID.lexema + "' nao declarada")        @@ RS-06
+      SENAO:
+          tipo(valor_for) <- TS[ID.lexema].tipo
+
+
+================================================================================
+BREAK
+================================================================================
+
+--------------------------------------------------------------------------------
+P31 | break -> PARE #
+--------------------------------------------------------------------------------
+Gramatica (SLR prod. 29 / LL(1) break -> PARE #):
+
+  SE profundidade_laco = 0:
+      ERRO("Instrucao PARE fora de estrutura de repeticao")         @@ RS-20
+
+
+================================================================================
+LISTA DE COMANDOS
+================================================================================
+
+As producoes de lista_comandos apenas encadeiam comandos. Nenhuma acao
+semantica propria -- as verificacoes sao feitas nos comandos individuais.
+
+--------------------------------------------------------------------------------
+P32 | lista_comandos -> comando lista_comandos   (SLR prod. 2)
+P33 | lista_comandos -> comando                  (SLR prod. 3)
+--------------------------------------------------------------------------------
+  @@ Nenhuma acao semantica -- delega para cada comando
+
+--------------------------------------------------------------------------------
+P34 | comando -> declaracao | atribuicao | entrada | saida |
+                condicional | laco_repeticao | break
+--------------------------------------------------------------------------------
+  @@ Nenhuma acao semantica -- delega para a producao especifica
+
+
+================================================================================

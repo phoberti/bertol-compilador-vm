@@ -1,0 +1,1349 @@
+============================================================
+ITENS LR(0) - LINGUAGEM BERTOL
+============================================================
+
+------------------------------------------------------------
+I0 = fechamento({ S' -> • lista_comandos })
+------------------------------------------------------------
+S'               -> • lista_comandos
+lista_comandos   -> • comando lista_comandos
+lista_comandos   -> • comando
+comando          -> • declaracao
+comando          -> • atribuicao
+comando          -> • entrada
+comando          -> • saida
+comando          -> • condicional
+comando          -> • laco_repeticao
+comando          -> • break
+declaracao       -> • ID "[" tipo "]" "#"
+atribuicao       -> • ID "[" tipo "]" VALE expr "#"
+atribuicao       -> • ID VALE expr "#"
+entrada          -> • RECEBE "[" ID "]" "#"
+saida            -> • MOSTRA "[" lista_valores "]" "#"
+condicional      -> • SE "(" expr ")" "{" lista_comandos "}" opcional_senao
+laco_repeticao   -> • laco_enquanto
+laco_repeticao   -> • laco_para
+laco_enquanto    -> • ENQUANTO "(" expr ")" "{" lista_comandos "}"
+laco_para        -> • PARA ID DE valor_for ATE expr PASSO valor_for "{" lista_comandos "}"
+break            -> • PARE "#"
+
+DESVIOS de I0:
+  lista_comandos -> I1
+  comando        -> I2
+  declaracao     -> I3
+  atribuicao     -> I4
+  entrada        -> I5
+  saida          -> I6
+  condicional    -> I7
+  laco_repeticao -> I8
+  laco_enquanto  -> I9
+  laco_para      -> I10
+  break          -> I11
+  ID             -> I12
+  RECEBE         -> I13
+  MOSTRA         -> I14
+  SE             -> I15
+  ENQUANTO       -> I16
+  PARA           -> I17
+  PARE           -> I18
+
+------------------------------------------------------------
+I1 = fechamento({ S' -> lista_comandos • })
+------------------------------------------------------------
+S' -> lista_comandos •
+
+DESVIOS de I1: (nenhum — estado de aceitação)
+
+------------------------------------------------------------
+I2 = fechamento({ lista_comandos -> comando • lista_comandos,
+                  lista_comandos -> comando • })
+------------------------------------------------------------
+lista_comandos -> comando • lista_comandos
+lista_comandos -> comando •
+lista_comandos -> • comando lista_comandos
+lista_comandos -> • comando
+comando        -> • declaracao
+comando        -> • atribuicao
+comando        -> • entrada
+comando        -> • saida
+comando        -> • condicional
+comando        -> • laco_repeticao
+comando        -> • break
+declaracao     -> • ID "[" tipo "]" "#"
+atribuicao     -> • ID "[" tipo "]" VALE expr "#"
+atribuicao     -> • ID VALE expr "#"
+entrada        -> • RECEBE "[" ID "]" "#"
+saida          -> • MOSTRA "[" lista_valores "]" "#"
+condicional    -> • SE "(" expr ")" "{" lista_comandos "}" opcional_senao
+laco_repeticao -> • laco_enquanto
+laco_repeticao -> • laco_para
+laco_enquanto  -> • ENQUANTO "(" expr ")" "{" lista_comandos "}"
+laco_para      -> • PARA ID DE valor_for ATE expr PASSO valor_for "{" lista_comandos "}"
+break          -> • PARE "#"
+
+DESVIOS de I2:
+  lista_comandos -> I19
+  comando        -> I2   (laço)
+  declaracao     -> I3
+  atribuicao     -> I4
+  entrada        -> I5
+  saida          -> I6
+  condicional    -> I7
+  laco_repeticao -> I8
+  laco_enquanto  -> I9
+  laco_para      -> I10
+  break          -> I11
+  ID             -> I12
+  RECEBE         -> I13
+  MOSTRA         -> I14
+  SE             -> I15
+  ENQUANTO       -> I16
+  PARA           -> I17
+  PARE           -> I18
+
+------------------------------------------------------------
+I3 = fechamento({ comando -> declaracao • })
+------------------------------------------------------------
+comando -> declaracao •
+
+DESVIOS de I3: (nenhum — reduz por produção 3)
+
+------------------------------------------------------------
+I4 = fechamento({ comando -> atribuicao • })
+------------------------------------------------------------
+comando -> atribuicao •
+
+DESVIOS de I4: (nenhum — reduz por produção 4)
+
+------------------------------------------------------------
+I5 = fechamento({ comando -> entrada • })
+------------------------------------------------------------
+comando -> entrada •
+
+DESVIOS de I5: (nenhum — reduz por produção 5)
+
+------------------------------------------------------------
+I6 = fechamento({ comando -> saida • })
+------------------------------------------------------------
+comando -> saida •
+
+DESVIOS de I6: (nenhum — reduz por produção 6)
+
+------------------------------------------------------------
+I7 = fechamento({ comando -> condicional • })
+------------------------------------------------------------
+comando -> condicional •
+
+DESVIOS de I7: (nenhum — reduz por produção 7)
+
+------------------------------------------------------------
+I8 = fechamento({ comando -> laco_repeticao • })
+------------------------------------------------------------
+comando -> laco_repeticao •
+
+DESVIOS de I8: (nenhum — reduz por produção 8)
+
+------------------------------------------------------------
+I9 = fechamento({ laco_repeticao -> laco_enquanto • })
+------------------------------------------------------------
+laco_repeticao -> laco_enquanto •
+
+DESVIOS de I9: (nenhum — reduz por produção 22)
+
+------------------------------------------------------------
+I10 = fechamento({ laco_repeticao -> laco_para • })
+------------------------------------------------------------
+laco_repeticao -> laco_para •
+
+DESVIOS de I10: (nenhum — reduz por produção 23)
+
+------------------------------------------------------------
+I11 = fechamento({ comando -> break • })
+------------------------------------------------------------
+comando -> break •
+
+DESVIOS de I11: (nenhum — reduz por produção 9)
+
+------------------------------------------------------------
+I12 = fechamento({ declaracao  -> ID • "[" tipo "]" "#",
+                   atribuicao  -> ID • "[" tipo "]" VALE expr "#",
+                   atribuicao  -> ID • VALE expr "#" })
+------------------------------------------------------------
+declaracao -> ID • "[" tipo "]" "#"
+atribuicao -> ID • "[" tipo "]" VALE expr "#"
+atribuicao -> ID • VALE expr "#"
+
+DESVIOS de I12:
+  "["  -> I20
+  VALE -> I21
+
+------------------------------------------------------------
+I13 = fechamento({ entrada -> RECEBE • "[" ID "]" "#" })
+------------------------------------------------------------
+entrada -> RECEBE • "[" ID "]" "#"
+
+DESVIOS de I13:
+  "[" -> I22
+
+------------------------------------------------------------
+I14 = fechamento({ saida -> MOSTRA • "[" lista_valores "]" "#" })
+------------------------------------------------------------
+saida -> MOSTRA • "[" lista_valores "]" "#"
+
+DESVIOS de I14:
+  "[" -> I23
+
+------------------------------------------------------------
+I15 = fechamento({ condicional -> SE • "(" expr ")" "{" lista_comandos "}" opcional_senao })
+------------------------------------------------------------
+condicional -> SE • "(" expr ")" "{" lista_comandos "}" opcional_senao
+
+DESVIOS de I15:
+  "(" -> I24
+
+------------------------------------------------------------
+I16 = fechamento({ laco_enquanto -> ENQUANTO • "(" expr ")" "{" lista_comandos "}" })
+------------------------------------------------------------
+laco_enquanto -> ENQUANTO • "(" expr ")" "{" lista_comandos "}"
+
+DESVIOS de I16:
+  "(" -> I25
+
+------------------------------------------------------------
+I17 = fechamento({ laco_para -> PARA • ID DE valor_for ATE expr PASSO valor_for "{" lista_comandos "}" })
+------------------------------------------------------------
+laco_para -> PARA • ID DE valor_for ATE expr PASSO valor_for "{" lista_comandos "}"
+
+DESVIOS de I17:
+  ID -> I26
+
+------------------------------------------------------------
+I18 = fechamento({ break -> PARE • "#" })
+------------------------------------------------------------
+break -> PARE • "#"
+
+DESVIOS de I18:
+  "#" -> I27
+
+------------------------------------------------------------
+I19 = fechamento({ lista_comandos -> comando lista_comandos • })
+------------------------------------------------------------
+lista_comandos -> comando lista_comandos •
+
+DESVIOS de I19: (nenhum — reduz por produção 1)
+
+------------------------------------------------------------
+I20 = fechamento({ declaracao -> ID "[" • tipo "]" "#",
+                   atribuicao -> ID "[" • tipo "]" VALE expr "#" })
+------------------------------------------------------------
+declaracao -> ID "[" • tipo "]" "#"
+atribuicao -> ID "[" • tipo "]" VALE expr "#"
+tipo       -> • INTEIRO
+tipo       -> • DECIMAL
+tipo       -> • TEXTO
+tipo       -> • LOGICO
+
+DESVIOS de I20:
+  tipo    -> I28
+  INTEIRO -> I29
+  DECIMAL -> I30
+  TEXTO   -> I31
+  LOGICO  -> I32
+
+------------------------------------------------------------
+I21 = fechamento({ atribuicao -> ID VALE • expr "#" })
+------------------------------------------------------------
+atribuicao -> ID VALE • expr "#"
+expr       -> • term expr_tail
+term       -> • XX term
+term       -> • "(" expr ")"
+term       -> • valor
+valor      -> • NUM_INT
+valor      -> • NUM_REAL
+valor      -> • STRING
+valor      -> • BOOLEAN
+valor      -> • ID
+
+DESVIOS de I21:
+  expr    -> I33
+  term    -> I34
+  valor   -> I35
+  XX      -> I36
+  "("     -> I37
+  NUM_INT -> I38
+  NUM_REAL-> I39
+  STRING  -> I40
+  BOOLEAN -> I41
+  ID      -> I42
+
+------------------------------------------------------------
+I22 = fechamento({ entrada -> RECEBE "[" • ID "]" "#" })
+------------------------------------------------------------
+entrada -> RECEBE "[" • ID "]" "#"
+
+DESVIOS de I22:
+  ID -> I43
+
+------------------------------------------------------------
+I23 = fechamento({ saida -> MOSTRA "[" • lista_valores "]" "#" })
+------------------------------------------------------------
+saida         -> MOSTRA "[" • lista_valores "]" "#"
+lista_valores -> • valor_saida
+lista_valores -> • valor_saida "," lista_valores
+valor_saida   -> • STRING
+valor_saida   -> • ID
+
+DESVIOS de I23:
+  lista_valores -> I44
+  valor_saida   -> I45
+  STRING        -> I46
+  ID            -> I47
+
+------------------------------------------------------------
+I24 = fechamento({ condicional -> SE "(" • expr ")" "{" lista_comandos "}" opcional_senao })
+------------------------------------------------------------
+condicional -> SE "(" • expr ")" "{" lista_comandos "}" opcional_senao
+expr        -> • term expr_tail
+term        -> • XX term
+term        -> • "(" expr ")"
+term        -> • valor
+valor       -> • NUM_INT
+valor       -> • NUM_REAL
+valor       -> • STRING
+valor       -> • BOOLEAN
+valor       -> • ID
+
+DESVIOS de I24:
+  expr    -> I48
+  term    -> I34
+  valor   -> I35
+  XX      -> I36
+  "("     -> I37
+  NUM_INT -> I38
+  NUM_REAL-> I39
+  STRING  -> I40
+  BOOLEAN -> I41
+  ID      -> I42
+
+------------------------------------------------------------
+I25 = fechamento({ laco_enquanto -> ENQUANTO "(" • expr ")" "{" lista_comandos "}" })
+------------------------------------------------------------
+laco_enquanto -> ENQUANTO "(" • expr ")" "{" lista_comandos "}"
+expr          -> • term expr_tail
+term          -> • XX term
+term          -> • "(" expr ")"
+term          -> • valor
+valor         -> • NUM_INT
+valor         -> • NUM_REAL
+valor         -> • STRING
+valor         -> • BOOLEAN
+valor         -> • ID
+
+DESVIOS de I25:
+  expr    -> I49
+  term    -> I34
+  valor   -> I35
+  XX      -> I36
+  "("     -> I37
+  NUM_INT -> I38
+  NUM_REAL-> I39
+  STRING  -> I40
+  BOOLEAN -> I41
+  ID      -> I42
+
+------------------------------------------------------------
+I26 = fechamento({ laco_para -> PARA ID • DE valor_for ATE expr PASSO valor_for "{" lista_comandos "}" })
+------------------------------------------------------------
+laco_para -> PARA ID • DE valor_for ATE expr PASSO valor_for "{" lista_comandos "}"
+
+DESVIOS de I26:
+  DE -> I50
+
+------------------------------------------------------------
+I27 = fechamento({ break -> PARE "#" • })
+------------------------------------------------------------
+break -> PARE "#" •
+
+DESVIOS de I27: (nenhum — reduz por produção 29)
+
+------------------------------------------------------------
+I28 = fechamento({ declaracao -> ID "[" tipo • "]" "#",
+                   atribuicao -> ID "[" tipo • "]" VALE expr "#" })
+------------------------------------------------------------
+declaracao -> ID "[" tipo • "]" "#"
+atribuicao -> ID "[" tipo • "]" VALE expr "#"
+
+DESVIOS de I28:
+  "]" -> I51
+
+------------------------------------------------------------
+I29 = fechamento({ tipo -> INTEIRO • })
+------------------------------------------------------------
+tipo -> INTEIRO •
+
+DESVIOS de I29: (nenhum — reduz por produção 35)
+
+------------------------------------------------------------
+I30 = fechamento({ tipo -> DECIMAL • })
+------------------------------------------------------------
+tipo -> DECIMAL •
+
+DESVIOS de I30: (nenhum — reduz por produção 36)
+
+------------------------------------------------------------
+I31 = fechamento({ tipo -> TEXTO • })
+------------------------------------------------------------
+tipo -> TEXTO •
+
+DESVIOS de I31: (nenhum — reduz por produção 37)
+
+------------------------------------------------------------
+I32 = fechamento({ tipo -> LOGICO • })
+------------------------------------------------------------
+tipo -> LOGICO •
+
+DESVIOS de I32: (nenhum — reduz por produção 38)
+
+------------------------------------------------------------
+I33 = fechamento({ atribuicao -> ID VALE expr • "#" })
+------------------------------------------------------------
+atribuicao -> ID VALE expr • "#"
+expr_tail  -> • binop term expr_tail    [via expr_tail em expr já consumido]
+
+NOTA: expr -> term expr_tail já foi reduzido para expr.
+      Verificar se expr_tail foi consumido antes de chegar aqui.
+      Se expr_tail -> ε, chegamos aqui diretamente.
+
+DESVIOS de I33:
+  "#" -> I52
+
+------------------------------------------------------------
+I34 = fechamento({ expr -> term • expr_tail })
+------------------------------------------------------------
+expr      -> term • expr_tail
+expr_tail -> • binop term expr_tail
+expr_tail -> • ε
+binop     -> • "??"
+binop     -> • "$$"
+binop     -> • MENOR
+binop     -> • MAIOR
+binop     -> • IGUAL
+binop     -> • MAG
+binop     -> • MEG
+binop     -> • DIFERENTE
+binop     -> • ADD
+binop     -> • SUB
+binop     -> • MULT
+binop     -> • DIV
+binop     -> • RESTO
+
+DESVIOS de I34:
+  expr_tail -> I53
+  binop     -> I54
+  "??"      -> I55
+  "$$"      -> I56
+  MENOR     -> I57
+  MAIOR     -> I58
+  IGUAL     -> I59
+  MAG       -> I60
+  MEG       -> I61
+  DIFERENTE -> I62
+  ADD       -> I63
+  SUB       -> I64
+  MULT      -> I65
+  DIV       -> I66
+  RESTO     -> I67
+
+------------------------------------------------------------
+I35 = fechamento({ term -> valor • })
+------------------------------------------------------------
+term -> valor •
+
+DESVIOS de I35: (nenhum — reduz por produção 57)
+
+------------------------------------------------------------
+I36 = fechamento({ term -> XX • term })
+------------------------------------------------------------
+term  -> XX • term
+term  -> • XX term
+term  -> • "(" expr ")"
+term  -> • valor
+valor -> • NUM_INT
+valor -> • NUM_REAL
+valor -> • STRING
+valor -> • BOOLEAN
+valor -> • ID
+
+DESVIOS de I36:
+  term    -> I68
+  XX      -> I36  (laço)
+  "("     -> I37
+  NUM_INT -> I38
+  NUM_REAL-> I39
+  STRING  -> I40
+  BOOLEAN -> I41
+  ID      -> I42
+  valor   -> I35
+
+------------------------------------------------------------
+I37 = fechamento({ term -> "(" • expr ")" })
+------------------------------------------------------------
+term  -> "(" • expr ")"
+expr  -> • term expr_tail
+term  -> • XX term
+term  -> • "(" expr ")"
+term  -> • valor
+valor -> • NUM_INT
+valor -> • NUM_REAL
+valor -> • STRING
+valor -> • BOOLEAN
+valor -> • ID
+
+DESVIOS de I37:
+  expr    -> I69
+  term    -> I34
+  valor   -> I35
+  XX      -> I36
+  "("     -> I37  (laço)
+  NUM_INT -> I38
+  NUM_REAL-> I39
+  STRING  -> I40
+  BOOLEAN -> I41
+  ID      -> I42
+
+------------------------------------------------------------
+I38 = fechamento({ valor -> NUM_INT • })
+------------------------------------------------------------
+valor -> NUM_INT •
+
+DESVIOS de I38: (nenhum — reduz por produção 30)
+
+------------------------------------------------------------
+I39 = fechamento({ valor -> NUM_REAL • })
+------------------------------------------------------------
+valor -> NUM_REAL •
+
+DESVIOS de I39: (nenhum — reduz por produção 31)
+
+------------------------------------------------------------
+I40 = fechamento({ valor -> STRING • })
+------------------------------------------------------------
+valor -> STRING •
+
+DESVIOS de I40: (nenhum — reduz por produção 32)
+
+------------------------------------------------------------
+I41 = fechamento({ valor -> BOOLEAN • })
+------------------------------------------------------------
+valor -> BOOLEAN •
+
+DESVIOS de I41: (nenhum — reduz por produção 33)
+
+------------------------------------------------------------
+I42 = fechamento({ valor -> ID • })
+------------------------------------------------------------
+valor -> ID •
+
+DESVIOS de I42: (nenhum — reduz por produção 34)
+
+------------------------------------------------------------
+I43 = fechamento({ entrada -> RECEBE "[" ID • "]" "#" })
+------------------------------------------------------------
+entrada -> RECEBE "[" ID • "]" "#"
+
+DESVIOS de I43:
+  "]" -> I70
+
+------------------------------------------------------------
+I44 = fechamento({ saida -> MOSTRA "[" lista_valores • "]" "#" })
+------------------------------------------------------------
+saida -> MOSTRA "[" lista_valores • "]" "#"
+
+DESVIOS de I44:
+  "]" -> I71
+
+------------------------------------------------------------
+I45 = fechamento({ lista_valores -> valor_saida •,
+                   lista_valores -> valor_saida • "," lista_valores })
+------------------------------------------------------------
+lista_valores -> valor_saida •
+lista_valores -> valor_saida • "," lista_valores
+
+DESVIOS de I45:
+  "," -> I72
+
+------------------------------------------------------------
+I46 = fechamento({ valor_saida -> STRING • })
+------------------------------------------------------------
+valor_saida -> STRING •
+
+DESVIOS de I46: (nenhum — reduz por produção 17)
+
+------------------------------------------------------------
+I47 = fechamento({ valor_saida -> ID • })
+------------------------------------------------------------
+valor_saida -> ID •
+
+DESVIOS de I47: (nenhum — reduz por produção 18)
+
+------------------------------------------------------------
+I48 = fechamento({ condicional -> SE "(" expr • ")" "{" lista_comandos "}" opcional_senao })
+------------------------------------------------------------
+condicional -> SE "(" expr • ")" "{" lista_comandos "}" opcional_senao
+
+DESVIOS de I48:
+  ")" -> I73
+
+------------------------------------------------------------
+I49 = fechamento({ laco_enquanto -> ENQUANTO "(" expr • ")" "{" lista_comandos "}" })
+------------------------------------------------------------
+laco_enquanto -> ENQUANTO "(" expr • ")" "{" lista_comandos "}"
+
+DESVIOS de I49:
+  ")" -> I74
+
+------------------------------------------------------------
+I50 = fechamento({ laco_para -> PARA ID DE • valor_for ATE expr PASSO valor_for "{" lista_comandos "}" })
+------------------------------------------------------------
+laco_para -> PARA ID DE • valor_for ATE expr PASSO valor_for "{" lista_comandos "}"
+valor_for -> • NUM_INT
+valor_for -> • NUM_REAL
+valor_for -> • ID
+
+DESVIOS de I50:
+  valor_for -> I75
+  NUM_INT   -> I76
+  NUM_REAL  -> I77
+  ID        -> I78
+
+------------------------------------------------------------
+I51 = fechamento({ declaracao -> ID "[" tipo "]" • "#",
+                   atribuicao -> ID "[" tipo "]" • VALE expr "#" })
+------------------------------------------------------------
+declaracao -> ID "[" tipo "]" • "#"
+atribuicao -> ID "[" tipo "]" • VALE expr "#"
+
+DESVIOS de I51:
+  "#"  -> I79
+  VALE -> I80
+
+------------------------------------------------------------
+I52 = fechamento({ atribuicao -> ID VALE expr "#" • })
+------------------------------------------------------------
+atribuicao -> ID VALE expr "#" •
+
+DESVIOS de I52: (nenhum — reduz por produção 12)
+
+------------------------------------------------------------
+I53 = fechamento({ expr -> term expr_tail • })
+------------------------------------------------------------
+expr -> term expr_tail •
+
+DESVIOS de I53: (nenhum — reduz por produção 39)
+
+------------------------------------------------------------
+I54 = fechamento({ expr_tail -> binop • term expr_tail })
+------------------------------------------------------------
+expr_tail -> binop • term expr_tail
+term      -> • XX term
+term      -> • "(" expr ")"
+term      -> • valor
+valor     -> • NUM_INT
+valor     -> • NUM_REAL
+valor     -> • STRING
+valor     -> • BOOLEAN
+valor     -> • ID
+
+DESVIOS de I54:
+  term    -> I81
+  XX      -> I36
+  "("     -> I37
+  NUM_INT -> I38
+  NUM_REAL-> I39
+  STRING  -> I40
+  BOOLEAN -> I41
+  ID      -> I42
+  valor   -> I35
+
+------------------------------------------------------------
+I55 = fechamento({ binop -> "??" • })
+------------------------------------------------------------
+binop -> "??" •
+
+DESVIOS de I55: (nenhum — reduz por produção 42)
+
+------------------------------------------------------------
+I56 = fechamento({ binop -> "$$" • })
+------------------------------------------------------------
+binop -> "$$" •
+
+DESVIOS de I56: (nenhum — reduz por produção 43)
+
+------------------------------------------------------------
+I57 = fechamento({ binop -> MENOR • })
+------------------------------------------------------------
+binop -> MENOR •
+
+DESVIOS de I57: (nenhum — reduz por produção 44)
+
+------------------------------------------------------------
+I58 = fechamento({ binop -> MAIOR • })
+------------------------------------------------------------
+binop -> MAIOR •
+
+DESVIOS de I58: (nenhum — reduz por produção 45)
+
+------------------------------------------------------------
+I59 = fechamento({ binop -> IGUAL • })
+------------------------------------------------------------
+binop -> IGUAL •
+
+DESVIOS de I59: (nenhum — reduz por produção 46)
+
+------------------------------------------------------------
+I60 = fechamento({ binop -> MAG • })
+------------------------------------------------------------
+binop -> MAG •
+
+DESVIOS de I60: (nenhum — reduz por produção 47)
+
+------------------------------------------------------------
+I61 = fechamento({ binop -> MEG • })
+------------------------------------------------------------
+binop -> MEG •
+
+DESVIOS de I61: (nenhum — reduz por produção 48)
+
+------------------------------------------------------------
+I62 = fechamento({ binop -> DIFERENTE • })
+------------------------------------------------------------
+binop -> DIFERENTE •
+
+DESVIOS de I62: (nenhum — reduz por produção 49)
+
+------------------------------------------------------------
+I63 = fechamento({ binop -> ADD • })
+------------------------------------------------------------
+binop -> ADD •
+
+DESVIOS de I63: (nenhum — reduz por produção 50)
+
+------------------------------------------------------------
+I64 = fechamento({ binop -> SUB • })
+------------------------------------------------------------
+binop -> SUB •
+
+DESVIOS de I64: (nenhum — reduz por produção 51)
+
+------------------------------------------------------------
+I65 = fechamento({ binop -> MULT • })
+------------------------------------------------------------
+binop -> MULT •
+
+DESVIOS de I65: (nenhum — reduz por produção 52)
+
+------------------------------------------------------------
+I66 = fechamento({ binop -> DIV • })
+------------------------------------------------------------
+binop -> DIV •
+
+DESVIOS de I66: (nenhum — reduz por produção 53)
+
+------------------------------------------------------------
+I67 = fechamento({ binop -> RESTO • })
+------------------------------------------------------------
+binop -> RESTO •
+
+DESVIOS de I67: (nenhum — reduz por produção 54)
+
+------------------------------------------------------------
+I68 = fechamento({ term -> XX term • })
+------------------------------------------------------------
+term -> XX term •
+
+DESVIOS de I68: (nenhum — reduz por produção 55)
+
+------------------------------------------------------------
+I69 = fechamento({ term -> "(" expr • ")" })
+------------------------------------------------------------
+term -> "(" expr • ")"
+
+DESVIOS de I69:
+  ")" -> I82
+
+------------------------------------------------------------
+I70 = fechamento({ entrada -> RECEBE "[" ID "]" • "#" })
+------------------------------------------------------------
+entrada -> RECEBE "[" ID "]" • "#"
+
+DESVIOS de I70:
+  "#" -> I83
+
+------------------------------------------------------------
+I71 = fechamento({ saida -> MOSTRA "[" lista_valores "]" • "#" })
+------------------------------------------------------------
+saida -> MOSTRA "[" lista_valores "]" • "#"
+
+DESVIOS de I71:
+  "#" -> I84
+
+------------------------------------------------------------
+I72 = fechamento({ lista_valores -> valor_saida "," • lista_valores })
+------------------------------------------------------------
+lista_valores -> valor_saida "," • lista_valores
+lista_valores -> • valor_saida
+lista_valores -> • valor_saida "," lista_valores
+valor_saida   -> • STRING
+valor_saida   -> • ID
+
+DESVIOS de I72:
+  lista_valores -> I85
+  valor_saida   -> I45
+  STRING        -> I46
+  ID            -> I47
+
+------------------------------------------------------------
+I73 = fechamento({ condicional -> SE "(" expr ")" • "{" lista_comandos "}" opcional_senao })
+------------------------------------------------------------
+condicional -> SE "(" expr ")" • "{" lista_comandos "}" opcional_senao
+
+DESVIOS de I73:
+  "{" -> I86
+
+------------------------------------------------------------
+I74 = fechamento({ laco_enquanto -> ENQUANTO "(" expr ")" • "{" lista_comandos "}" })
+------------------------------------------------------------
+laco_enquanto -> ENQUANTO "(" expr ")" • "{" lista_comandos "}"
+
+DESVIOS de I74:
+  "{" -> I87
+
+------------------------------------------------------------
+I75 = fechamento({ laco_para -> PARA ID DE valor_for • ATE expr PASSO valor_for "{" lista_comandos "}" })
+------------------------------------------------------------
+laco_para -> PARA ID DE valor_for • ATE expr PASSO valor_for "{" lista_comandos "}"
+
+DESVIOS de I75:
+  ATE -> I88
+
+------------------------------------------------------------
+I76 = fechamento({ valor_for -> NUM_INT • })
+------------------------------------------------------------
+valor_for -> NUM_INT •
+
+DESVIOS de I76: (nenhum — reduz por produção 26)
+
+------------------------------------------------------------
+I77 = fechamento({ valor_for -> NUM_REAL • })
+------------------------------------------------------------
+valor_for -> NUM_REAL •
+
+DESVIOS de I77: (nenhum — reduz por produção 27)
+
+------------------------------------------------------------
+I78 = fechamento({ valor_for -> ID • })
+------------------------------------------------------------
+valor_for -> ID •
+
+DESVIOS de I78: (nenhum — reduz por produção 28)
+
+------------------------------------------------------------
+I79 = fechamento({ declaracao -> ID "[" tipo "]" "#" • })
+------------------------------------------------------------
+declaracao -> ID "[" tipo "]" "#" •
+
+DESVIOS de I79: (nenhum — reduz por produção 10)
+
+------------------------------------------------------------
+I80 = fechamento({ atribuicao -> ID "[" tipo "]" VALE • expr "#" })
+------------------------------------------------------------
+atribuicao -> ID "[" tipo "]" VALE • expr "#"
+expr       -> • term expr_tail
+term       -> • XX term
+term       -> • "(" expr ")"
+term       -> • valor
+valor      -> • NUM_INT
+valor      -> • NUM_REAL
+valor      -> • STRING
+valor      -> • BOOLEAN
+valor      -> • ID
+
+DESVIOS de I80:
+  expr    -> I89
+  term    -> I34
+  valor   -> I35
+  XX      -> I36
+  "("     -> I37
+  NUM_INT -> I38
+  NUM_REAL-> I39
+  STRING  -> I40
+  BOOLEAN -> I41
+  ID      -> I42
+
+------------------------------------------------------------
+I81 = fechamento({ expr_tail -> binop term • expr_tail })
+------------------------------------------------------------
+expr_tail -> binop term • expr_tail
+expr_tail -> • binop term expr_tail
+expr_tail -> • ε
+binop     -> • "??"
+binop     -> • "$$"
+binop     -> • MENOR
+binop     -> • MAIOR
+binop     -> • IGUAL
+binop     -> • MAG
+binop     -> • MEG
+binop     -> • DIFERENTE
+binop     -> • ADD
+binop     -> • SUB
+binop     -> • MULT
+binop     -> • DIV
+binop     -> • RESTO
+
+DESVIOS de I81:
+  expr_tail -> I90
+  binop     -> I54
+  "??"      -> I55
+  "$$"      -> I56
+  MENOR     -> I57
+  MAIOR     -> I58
+  IGUAL     -> I59
+  MAG       -> I60
+  MEG       -> I61
+  DIFERENTE -> I62
+  ADD       -> I63
+  SUB       -> I64
+  MULT      -> I65
+  DIV       -> I66
+  RESTO     -> I67
+
+------------------------------------------------------------
+I82 = fechamento({ term -> "(" expr ")" • })
+------------------------------------------------------------
+term -> "(" expr ")" •
+
+DESVIOS de I82: (nenhum — reduz por produção 56)
+
+------------------------------------------------------------
+I83 = fechamento({ entrada -> RECEBE "[" ID "]" "#" • })
+------------------------------------------------------------
+entrada -> RECEBE "[" ID "]" "#" •
+
+DESVIOS de I83: (nenhum — reduz por produção 13)
+
+------------------------------------------------------------
+I84 = fechamento({ saida -> MOSTRA "[" lista_valores "]" "#" • })
+------------------------------------------------------------
+saida -> MOSTRA "[" lista_valores "]" "#" •
+
+DESVIOS de I84: (nenhum — reduz por produção 14)
+
+------------------------------------------------------------
+I85 = fechamento({ lista_valores -> valor_saida "," lista_valores • })
+------------------------------------------------------------
+lista_valores -> valor_saida "," lista_valores •
+
+DESVIOS de I85: (nenhum — reduz por produção 16)
+
+------------------------------------------------------------
+I86 = fechamento({ condicional -> SE "(" expr ")" "{" • lista_comandos "}" opcional_senao })
+------------------------------------------------------------
+condicional    -> SE "(" expr ")" "{" • lista_comandos "}" opcional_senao
+lista_comandos -> • comando lista_comandos
+lista_comandos -> • comando
+comando        -> • declaracao
+comando        -> • atribuicao
+comando        -> • entrada
+comando        -> • saida
+comando        -> • condicional
+comando        -> • laco_repeticao
+comando        -> • break
+declaracao     -> • ID "[" tipo "]" "#"
+atribuicao     -> • ID "[" tipo "]" VALE expr "#"
+atribuicao     -> • ID VALE expr "#"
+entrada        -> • RECEBE "[" ID "]" "#"
+saida          -> • MOSTRA "[" lista_valores "]" "#"
+condicional    -> • SE "(" expr ")" "{" lista_comandos "}" opcional_senao
+laco_repeticao -> • laco_enquanto
+laco_repeticao -> • laco_para
+laco_enquanto  -> • ENQUANTO "(" expr ")" "{" lista_comandos "}"
+laco_para      -> • PARA ID DE valor_for ATE expr PASSO valor_for "{" lista_comandos "}"
+break          -> • PARE "#"
+
+DESVIOS de I86:
+  lista_comandos -> I91
+  comando        -> I2
+  declaracao     -> I3
+  atribuicao     -> I4
+  entrada        -> I5
+  saida          -> I6
+  condicional    -> I7
+  laco_repeticao -> I8
+  laco_enquanto  -> I9
+  laco_para      -> I10
+  break          -> I11
+  ID             -> I12
+  RECEBE         -> I13
+  MOSTRA         -> I14
+  SE             -> I15
+  ENQUANTO       -> I16
+  PARA           -> I17
+  PARE           -> I18
+
+------------------------------------------------------------
+I87 = fechamento({ laco_enquanto -> ENQUANTO "(" expr ")" "{" • lista_comandos "}" })
+------------------------------------------------------------
+laco_enquanto  -> ENQUANTO "(" expr ")" "{" • lista_comandos "}"
+lista_comandos -> • comando lista_comandos
+lista_comandos -> • comando
+comando        -> • declaracao
+comando        -> • atribuicao
+comando        -> • entrada
+comando        -> • saida
+comando        -> • condicional
+comando        -> • laco_repeticao
+comando        -> • break
+declaracao     -> • ID "[" tipo "]" "#"
+atribuicao     -> • ID "[" tipo "]" VALE expr "#"
+atribuicao     -> • ID VALE expr "#"
+entrada        -> • RECEBE "[" ID "]" "#"
+saida          -> • MOSTRA "[" lista_valores "]" "#"
+condicional    -> • SE "(" expr ")" "{" lista_comandos "}" opcional_senao
+laco_repeticao -> • laco_enquanto
+laco_repeticao -> • laco_para
+laco_enquanto  -> • ENQUANTO "(" expr ")" "{" lista_comandos "}"
+laco_para      -> • PARA ID DE valor_for ATE expr PASSO valor_for "{" lista_comandos "}"
+break          -> • PARE "#"
+
+DESVIOS de I87:
+  lista_comandos -> I92
+  comando        -> I2
+  declaracao     -> I3
+  atribuicao     -> I4
+  entrada        -> I5
+  saida          -> I6
+  condicional    -> I7
+  laco_repeticao -> I8
+  laco_enquanto  -> I9
+  laco_para      -> I10
+  break          -> I11
+  ID             -> I12
+  RECEBE         -> I13
+  MOSTRA         -> I14
+  SE             -> I15
+  ENQUANTO       -> I16
+  PARA           -> I17
+  PARE           -> I18
+
+------------------------------------------------------------
+I88 = fechamento({ laco_para -> PARA ID DE valor_for ATE • expr PASSO valor_for "{" lista_comandos "}" })
+------------------------------------------------------------
+laco_para -> PARA ID DE valor_for ATE • expr PASSO valor_for "{" lista_comandos "}"
+expr      -> • term expr_tail
+term      -> • XX term
+term      -> • "(" expr ")"
+term      -> • valor
+valor     -> • NUM_INT
+valor     -> • NUM_REAL
+valor     -> • STRING
+valor     -> • BOOLEAN
+valor     -> • ID
+
+DESVIOS de I88:
+  expr    -> I93
+  term    -> I34
+  valor   -> I35
+  XX      -> I36
+  "("     -> I37
+  NUM_INT -> I38
+  NUM_REAL-> I39
+  STRING  -> I40
+  BOOLEAN -> I41
+  ID      -> I42
+
+------------------------------------------------------------
+I89 = fechamento({ atribuicao -> ID "[" tipo "]" VALE expr • "#" })
+------------------------------------------------------------
+atribuicao -> ID "[" tipo "]" VALE expr • "#"
+
+DESVIOS de I89:
+  "#" -> I94
+
+------------------------------------------------------------
+I90 = fechamento({ expr_tail -> binop term expr_tail • })
+------------------------------------------------------------
+expr_tail -> binop term expr_tail •
+
+DESVIOS de I90: (nenhum — reduz por produção 40)
+
+------------------------------------------------------------
+I91 = fechamento({ condicional -> SE "(" expr ")" "{" lista_comandos • "}" opcional_senao })
+------------------------------------------------------------
+condicional -> SE "(" expr ")" "{" lista_comandos • "}" opcional_senao
+
+DESVIOS de I91:
+  "}" -> I95
+
+------------------------------------------------------------
+I92 = fechamento({ laco_enquanto -> ENQUANTO "(" expr ")" "{" lista_comandos • "}" })
+------------------------------------------------------------
+laco_enquanto -> ENQUANTO "(" expr ")" "{" lista_comandos • "}"
+
+DESVIOS de I92:
+  "}" -> I96
+
+------------------------------------------------------------
+I93 = fechamento({ laco_para -> PARA ID DE valor_for ATE expr • PASSO valor_for "{" lista_comandos "}" })
+------------------------------------------------------------
+laco_para -> PARA ID DE valor_for ATE expr • PASSO valor_for "{" lista_comandos "}"
+
+DESVIOS de I93:
+  PASSO -> I97
+
+------------------------------------------------------------
+I94 = fechamento({ atribuicao -> ID "[" tipo "]" VALE expr "#" • })
+------------------------------------------------------------
+atribuicao -> ID "[" tipo "]" VALE expr "#" •
+
+DESVIOS de I94: (nenhum — reduz por produção 11)
+
+------------------------------------------------------------
+I95 = fechamento({ condicional -> SE "(" expr ")" "{" lista_comandos "}" • opcional_senao })
+------------------------------------------------------------
+condicional  -> SE "(" expr ")" "{" lista_comandos "}" • opcional_senao
+opcional_senao -> • SENAO "{" lista_comandos "}"
+opcional_senao -> • ε
+
+DESVIOS de I95:
+  opcional_senao -> I98
+  SENAO          -> I99
+
+------------------------------------------------------------
+I96 = fechamento({ laco_enquanto -> ENQUANTO "(" expr ")" "{" lista_comandos "}" • })
+------------------------------------------------------------
+laco_enquanto -> ENQUANTO "(" expr ")" "{" lista_comandos "}" •
+
+DESVIOS de I96: (nenhum — reduz por produção 24)
+
+------------------------------------------------------------
+I97 = fechamento({ laco_para -> PARA ID DE valor_for ATE expr PASSO • valor_for "{" lista_comandos "}" })
+------------------------------------------------------------
+laco_para -> PARA ID DE valor_for ATE expr PASSO • valor_for "{" lista_comandos "}"
+valor_for -> • NUM_INT
+valor_for -> • NUM_REAL
+valor_for -> • ID
+
+DESVIOS de I97:
+  valor_for -> I100
+  NUM_INT   -> I76
+  NUM_REAL  -> I77
+  ID        -> I78
+
+------------------------------------------------------------
+I98 = fechamento({ condicional -> SE "(" expr ")" "{" lista_comandos "}" opcional_senao • })
+------------------------------------------------------------
+condicional -> SE "(" expr ")" "{" lista_comandos "}" opcional_senao •
+
+DESVIOS de I98: (nenhum — reduz por produção 19)
+
+------------------------------------------------------------
+I99 = fechamento({ opcional_senao -> SENAO • "{" lista_comandos "}" })
+------------------------------------------------------------
+opcional_senao -> SENAO • "{" lista_comandos "}"
+
+DESVIOS de I99:
+  "{" -> I101
+
+------------------------------------------------------------
+I100 = fechamento({ laco_para -> PARA ID DE valor_for ATE expr PASSO valor_for • "{" lista_comandos "}" })
+------------------------------------------------------------
+laco_para -> PARA ID DE valor_for ATE expr PASSO valor_for • "{" lista_comandos "}"
+
+DESVIOS de I100:
+  "{" -> I102
+
+------------------------------------------------------------
+I101 = fechamento({ opcional_senao -> SENAO "{" • lista_comandos "}" })
+------------------------------------------------------------
+opcional_senao -> SENAO "{" • lista_comandos "}"
+lista_comandos -> • comando lista_comandos
+lista_comandos -> • comando
+comando        -> • declaracao
+comando        -> • atribuicao
+comando        -> • entrada
+comando        -> • saida
+comando        -> • condicional
+comando        -> • laco_repeticao
+comando        -> • break
+declaracao     -> • ID "[" tipo "]" "#"
+atribuicao     -> • ID "[" tipo "]" VALE expr "#"
+atribuicao     -> • ID VALE expr "#"
+entrada        -> • RECEBE "[" ID "]" "#"
+saida          -> • MOSTRA "[" lista_valores "]" "#"
+condicional    -> • SE "(" expr ")" "{" lista_comandos "}" opcional_senao
+laco_repeticao -> • laco_enquanto
+laco_repeticao -> • laco_para
+laco_enquanto  -> • ENQUANTO "(" expr ")" "{" lista_comandos "}"
+laco_para      -> • PARA ID DE valor_for ATE expr PASSO valor_for "{" lista_comandos "}"
+break          -> • PARE "#"
+
+DESVIOS de I101:
+  lista_comandos -> I103
+  comando        -> I2
+  declaracao     -> I3
+  atribuicao     -> I4
+  entrada        -> I5
+  saida          -> I6
+  condicional    -> I7
+  laco_repeticao -> I8
+  laco_enquanto  -> I9
+  laco_para      -> I10
+  break          -> I11
+  ID             -> I12
+  RECEBE         -> I13
+  MOSTRA         -> I14
+  SE             -> I15
+  ENQUANTO       -> I16
+  PARA           -> I17
+  PARE           -> I18
+
+------------------------------------------------------------
+I102 = fechamento({ laco_para -> PARA ID DE valor_for ATE expr PASSO valor_for "{" • lista_comandos "}" })
+------------------------------------------------------------
+laco_para      -> PARA ID DE valor_for ATE expr PASSO valor_for "{" • lista_comandos "}"
+lista_comandos -> • comando lista_comandos
+lista_comandos -> • comando
+comando        -> • declaracao
+comando        -> • atribuicao
+comando        -> • entrada
+comando        -> • saida
+comando        -> • condicional
+comando        -> • laco_repeticao
+comando        -> • break
+declaracao     -> • ID "[" tipo "]" "#"
+atribuicao     -> • ID "[" tipo "]" VALE expr "#"
+atribuicao     -> • ID VALE expr "#"
+entrada        -> • RECEBE "[" ID "]" "#"
+saida          -> • MOSTRA "[" lista_valores "]" "#"
+condicional    -> • SE "(" expr ")" "{" lista_comandos "}" opcional_senao
+laco_repeticao -> • laco_enquanto
+laco_repeticao -> • laco_para
+laco_enquanto  -> • ENQUANTO "(" expr ")" "{" lista_comandos "}"
+laco_para      -> • PARA ID DE valor_for ATE expr PASSO valor_for "{" lista_comandos "}"
+break          -> • PARE "#"
+
+DESVIOS de I102:
+  lista_comandos -> I104
+  comando        -> I2
+  declaracao     -> I3
+  atribuicao     -> I4
+  entrada        -> I5
+  saida          -> I6
+  condicional    -> I7
+  laco_repeticao -> I8
+  laco_enquanto  -> I9
+  laco_para      -> I10
+  break          -> I11
+  ID             -> I12
+  RECEBE         -> I13
+  MOSTRA         -> I14
+  SE             -> I15
+  ENQUANTO       -> I16
+  PARA           -> I17
+  PARE           -> I18
+
+------------------------------------------------------------
+I103 = fechamento({ opcional_senao -> SENAO "{" lista_comandos • "}" })
+------------------------------------------------------------
+opcional_senao -> SENAO "{" lista_comandos • "}"
+
+DESVIOS de I103:
+  "}" -> I105
+
+------------------------------------------------------------
+I104 = fechamento({ laco_para -> PARA ID DE valor_for ATE expr PASSO valor_for "{" lista_comandos • "}" })
+------------------------------------------------------------
+laco_para -> PARA ID DE valor_for ATE expr PASSO valor_for "{" lista_comandos • "}"
+
+DESVIOS de I104:
+  "}" -> I106
+
+------------------------------------------------------------
+I105 = fechamento({ opcional_senao -> SENAO "{" lista_comandos "}" • })
+------------------------------------------------------------
+opcional_senao -> SENAO "{" lista_comandos "}" •
+
+DESVIOS de I105: (nenhum — reduz por produção 20)
+
+------------------------------------------------------------
+I106 = fechamento({ laco_para -> PARA ID DE valor_for ATE expr PASSO valor_for "{" lista_comandos "}" • })
+------------------------------------------------------------
+laco_para -> PARA ID DE valor_for ATE expr PASSO valor_for "{" lista_comandos "}" •
+
+DESVIOS de I106: (nenhum — reduz por produção 25)
+
+============================================================
+RESUMO
+============================================================
+Total de estados: 107 (I0 a I106)
+
+Estados finais de redução (sem desvios):
+  I1   — aceitar (S' -> lista_comandos)
+  I3   — R3  (comando -> declaracao)
+  I4   — R4  (comando -> atribuicao)
+  I5   — R5  (comando -> entrada)
+  I6   — R6  (comando -> saida)
+  I7   — R7  (comando -> condicional)
+  I8   — R8  (comando -> laco_repeticao)
+  I9   — R22 (laco_repeticao -> laco_enquanto)
+  I10  — R23 (laco_repeticao -> laco_para)
+  I11  — R9  (comando -> break)
+  I19  — R1  (lista_comandos -> comando lista_comandos)
+  I27  — R29 (break -> PARE "#")
+  I29  — R35 (tipo -> INTEIRO)
+  I30  — R36 (tipo -> DECIMAL)
+  I31  — R37 (tipo -> TEXTO)
+  I32  — R38 (tipo -> LOGICO)
+  I35  — R57 (term -> valor)
+  I38  — R30 (valor -> NUM_INT)
+  I39  — R31 (valor -> NUM_REAL)
+  I40  — R32 (valor -> STRING)
+  I41  — R33 (valor -> BOOLEAN)
+  I42  — R34 (valor -> ID)
+  I46  — R17 (valor_saida -> STRING)
+  I47  — R18 (valor_saida -> ID)
+  I52  — R12 (atribuicao -> ID VALE expr "#")
+  I53  — R39 (expr -> term expr_tail)
+  I55  — R42 (binop -> "??")
+  I56  — R43 (binop -> "$$")
+  I57  — R44 (binop -> MENOR)
+  I58  — R45 (binop -> MAIOR)
+  I59  — R46 (binop -> IGUAL)
+  I60  — R47 (binop -> MAG)
+  I61  — R48 (binop -> MEG)
+  I62  — R49 (binop -> DIFERENTE)
+  I63  — R50 (binop -> ADD)
+  I64  — R51 (binop -> SUB)
+  I65  — R52 (binop -> MULT)
+  I66  — R53 (binop -> DIV)
+  I67  — R54 (binop -> RESTO)
+  I68  — R55 (term -> XX term)
+  I76  — R26 (valor_for -> NUM_INT)
+  I77  — R27 (valor_for -> NUM_REAL)
+  I78  — R28 (valor_for -> ID)
+  I79  — R10 (declaracao -> ID "[" tipo "]" "#")
+  I82  — R56 (term -> "(" expr ")")
+  I83  — R13 (entrada -> RECEBE "[" ID "]" "#")
+  I84  — R14 (saida -> MOSTRA "[" lista_valores "]" "#")
+  I85  — R16 (lista_valores -> valor_saida "," lista_valores)
+  I90  — R40 (expr_tail -> binop term expr_tail)
+  I94  — R11 (atribuicao -> ID "[" tipo "]" VALE expr "#")
+  I96  — R24 (laco_enquanto -> ENQUANTO "(" expr ")" "{" lista_comandos "}")
+  I98  — R19 (condicional -> SE "(" expr ")" "{" lista_comandos "}" opcional_senao)
+  I105 — R20 (opcional_senao -> SENAO "{" lista_comandos "}")
+  I106 — R25 (laco_para -> PARA ID DE valor_for ATE expr PASSO valor_for "{" lista_comandos "}")
+
+Estados com ε-redução (expr_tail -> ε e opcional_senao -> ε):
+  expr_tail   -> ε reduz em I34 e I81 quando lookahead ∉ FIRST(binop)
+  opcional_senao -> ε reduz em I95 quando lookahead ≠ SENAO
+============================================================

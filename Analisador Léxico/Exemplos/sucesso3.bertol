@@ -1,0 +1,24 @@
+@@ Teste 3 — Operadores logicos, aritmeticos e laco ENQUANTO
+a[INTEIRO]#
+b[INTEIRO]#
+resultado[INTEIRO]#
+continuar[LOGICO]#
+
+a VALE 10#
+b VALE 3#
+
+resultado VALE (a ADD b) MULT 2#
+MOSTRA["Resultado: ", resultado]#
+
+@@ Expressao com AND e OR
+continuar VALE (a MAIOR 0) $$ (b DIFERENTE 0)#
+MOSTRA["Continuar: ", continuar]#
+
+@@ Laco condicional com PARE
+ENQUANTO(VERDADEIRO) {
+    a VALE a SUB 1#
+    SE(a IGUAL 0) {
+        PARE#
+    }
+    MOSTRA["a = ", a]#
+}

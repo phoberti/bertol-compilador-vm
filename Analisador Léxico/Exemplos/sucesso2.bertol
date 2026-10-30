@@ -1,0 +1,18 @@
+@@ Teste 2 — Estruturas de controle e expressoes
+nota[DECIMAL]#
+aprovado[LOGICO]#
+contador[INTEIRO]#
+
+RECEBE[nota]#
+
+aprovado VALE nota MAG 6.0#
+
+SE(aprovado) {
+    MOSTRA["Aluno aprovado!"]#
+    PARA contador DE 1 ATE 3 PASSO 1 {
+        MOSTRA["Estrela: ", contador]#
+    }
+}
+SENAO {
+    MOSTRA["Aluno reprovado."]#
+}

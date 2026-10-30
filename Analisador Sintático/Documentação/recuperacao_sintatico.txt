@@ -1,0 +1,292 @@
+================================================================================
+  RECUPERAÇÃO DE ERROS - ANALISADOR SINTÁTICO (SLR e LL(1))
+================================================================================
+
+
+================================================================================
+ VISÃO GERAL
+================================================================================
+
+O compilador Bertol implementa dois analisadores sintáticos independentes,
+ambos com suporte ao mesmo modo de recuperação:
+
+  - SLRParser  -> análise ascendente (bottom-up), baseada em tabela ACTION/GOTO
+  - LL1Parser  -> análise descendente (top-down), baseada em tabela LL(1)
+
+Ambos recebem o parâmetro `recuperacao`:
+
+  recuperacao = true  -> Modo com recuperação (padrão)
+                        Ao encontrar um erro, aplica recuperação em modo
+                        pânico e tenta continuar a análise.
+
+  recuperacao = false -> Modo sem recuperação
+                        Ao encontrar o primeiro erro, interrompe a análise
+                        imediatamente.
+
+Assinaturas:
+
+  SLRParser.parse(tokens, recuperacao=true)
+  LL1Parser.parse(tokens, recuperacao=true)
+
+Ambos retornam: { sucesso, erros[], trajetoria[] }
+
+Limite de erros: a análise é interrompida automaticamente ao atingir
+10 erros sintáticos, independentemente do modo.
+
+
+================================================================================
+ CONJUNTO DE SINCRONIZAÇÃO
+================================================================================
+
+A recuperação em modo pânico depende de um conjunto de tokens de
+sincronização, tokens que marcam pontos seguros de reinício na gramática.
+
+Conjunto de sincronização (igual nos dois parsers):
+
+  { "#", "}", "$", "SE", "ENQUANTO", "PARA", "RECEBE", "MOSTRA", "ID", "PARE" }
+
+O LL(1) inclui também "SENAO":
+
+  { "#", "}", "$", "SE", "ENQUANTO", "PARA", "RECEBE", "MOSTRA", "ID", "PARE", "SENAO" }
+
+Esses tokens foram escolhidos por serem pontos de início de instrução na
+linguagem Bertol — ao alcançar qualquer um deles, o parser está em um
+estado gramaticalmente seguro para recomeçar a análise.
+
+
+================================================================================
+ ANALISADOR SLR - RECUPERAÇÃO DETALHADA
+================================================================================
+
+O SLRParser é um parser ascendente com pilha. Ele mantém:
+  - `pilha`   : estados do autômato SLR
+  - `simbolos`: símbolos correspondentes
+  - `idx`     : posição atual no buffer de tokens
+  - `erros`   : mensagens de erro acumuladas
+
+--------------------------------------------------------------------------------
+ Quando o erro ocorre
+--------------------------------------------------------------------------------
+
+Um erro sintático no SLR ocorre quando o parser consulta a tabela ACTION
+para o estado atual e o terminal atual, e não encontra nenhuma ação definida:
+
+  const acao = SLR_ACTION[estado]?.[terminal];
+  if (!acao) {
+      // ERRO: não há ação para (estado, terminal)
+  }
+
+Neste ponto, o compilador sabe os tokens que eram esperados (as chaves
+de SLR_ACTION[estado]) e os exibe na mensagem de erro.
+
+--------------------------------------------------------------------------------
+ Código da recuperação SLR
+--------------------------------------------------------------------------------
+
+  if (!acao) {
+      const esp = Object.keys(SLR_ACTION[estado] || {}).join(", ");
+      const msg = `Erro sintático na linha ${tok.linha}: token inesperado \
+'${tok.lexema}' (${terminal}). Esperado: ${esp || "nenhum"}`;
+
+      erros.push(msg);
+      trajetoria.push({ ..., acao: `❌ ERRO — ${msg}`, tipo: "erro" });
+
+      // Passo 1: avança o buffer até um token de sincronização
+      const sync = new Set(["#", "}", "$", "SE", "ENQUANTO", "PARA",
+                             "RECEBE", "MOSTRA", "ID", "PARE"]);
+      while (idx < entrada.length - 1 && !sync.has(entrada[idx].terminal))
+          idx++;
+
+      // Passo 2: verifica condições de parada
+      if (!recuperacao || idx >= entrada.length - 1 || erros.length >= 10)
+          break;
+
+      // Passo 3: reinicia a pilha completamente
+      pilha.length   = 0;  pilha.push(0);
+      simbolos.length = 0;
+
+      continue;  // retoma o loop com o token de sincronização
+  }
+
+--------------------------------------------------------------------------------
+ O que acontece passo a passo (SLR)
+--------------------------------------------------------------------------------
+
+  PASSO 1 - Avança o buffer até sincronização:
+    O parser descarta tokens do buffer de entrada, um por um, até encontrar
+    um token pertencente ao conjunto de sincronização.
+    Se chegar ao fim do buffer ($) sem encontrar, para.
+
+  PASSO 2 - Verifica condições de parada:
+    Mesmo com recuperação ativa, a análise para se:
+      a) `recuperacao` é false
+      b) O cursor chegou ao fim do arquivo (idx >= entrada.length - 1)
+      c) O limite de 10 erros foi atingido
+
+  PASSO 3 - Reinicia a pilha:
+    A pilha de estados e a pilha de símbolos são completamente esvaziadas
+    e reiniciadas com o estado inicial (0).
+    Isso é necessário porque, no SLR, o estado da pilha é incompatível
+    com o ponto do buffer após o salto — seria impossível continuar com
+    a pilha "suja". Reiniciar a pilha é a única forma segura de retomar.
+
+  RETOMADA:
+    O loop continua com o token de sincronização sendo processado a partir
+    do estado inicial, como se fosse o começo de uma nova instrução.
+
+--------------------------------------------------------------------------------
+ Indicação de aceitação com erros (SLR)
+--------------------------------------------------------------------------------
+
+  if (acao === "acc") {
+      const temErros = erros.length > 0;
+      trajetoria.push({
+          acao: temErros
+              ? " ACEITAR (com erros — recuperação em modo pânico foi usada)"
+              : " ACEITAR",
+          tipo: temErros ? "erro" : "aceitar"
+      });
+      return { sucesso: !temErros, erros, trajetoria };
+  }
+
+  Se a análise chega ao fim (acc) mas houve erros pelo caminho:
+    - sucesso = false
+    - A trajetória indica claramente que houve recuperação
+    - Os erros encontrados são listados normalmente
+
+
+================================================================================
+ ANALISADOR LL(1)  RECUPERAÇÃO DETALHADA
+================================================================================
+
+O LL1Parser é um parser descendente com pilha explícita de símbolos
+gramaticais (terminais e não-terminais). Ele mantém:
+  - `pilha`   : símbolos gramaticais esperados (ex: ["$", "lista_comandos"])
+  - `idx`     : posição atual no buffer de tokens
+  - `erros`   : mensagens de erro acumuladas
+
+O LL(1) tem dois tipos distintos de erro, com recuperação diferente para
+cada um.
+
+--------------------------------------------------------------------------------
+ Erro Tipo 1 - Casamento falhou (terminal × terminal)
+--------------------------------------------------------------------------------
+
+  Ocorre quando: o topo da pilha é um terminal, mas o token atual é diferente.
+  Significa que era esperado um símbolo específico e outro apareceu.
+
+  Exemplo:
+    SE(x MAIOR 0   ← falta o ')' de fechamento
+    O parser espera ')' no topo da pilha, mas encontra '{'.
+
+  Código:
+    if (!LL1_NTS.has(topo)) {          // topo é terminal
+        if (topo === term) {
+            // casamento correto — avança normalmente
+        } else {
+            const msg = `Erro sintático na linha ${tok.linha}: \
+esperado '${topo}', encontrado '${tok.lexema}'.`;
+            erros.push(msg);
+            trajetoria.push({ ..., acao: `❌ ERRO — ${msg}`, tipo: "erro" });
+
+            if (!recuperacao) break;
+            if (idx < entrada.length - 1) idx++;   // avança UMA posição no buffer
+            else break;
+            if (erros.length >= 10) { erros.push("Muitos erros. Análise interrompida."); break; }
+        }
+        continue;
+    }
+
+  Estratégia (tipo 1):
+    - Apenas avança UMA posição no buffer (descarta o token inesperado).
+    - Não descarta o topo da pilha — o terminal esperado permanece.
+    - Na próxima iteração, o parser tenta casar novamente com o próximo token.
+    - Esta é uma recuperação mais conservadora: tenta "inserir" o token
+      esperado implicitamente e avança o buffer.
+
+--------------------------------------------------------------------------------
+Erro Tipo 2 - Expansão falhou (não-terminal × terminal)
+--------------------------------------------------------------------------------
+
+  Ocorre quando: o topo da pilha é um não-terminal, mas não existe produção
+  na tabela LL(1) para o par (não-terminal, terminal atual).
+
+  Exemplo:
+    x VALE 10 VALE 20   ← segundo 'VALE' é inesperado para <lista_comandos>
+
+  Código:
+    const entrada_tabela = LL1_TABLE[topo]?.[term];
+    if (!entrada_tabela) {
+        const esp = LL1_TABLE[topo]
+            ? Object.keys(LL1_TABLE[topo]).join(", ")
+            : "nenhum";
+        const msg = `Erro sintático na linha ${tok.linha}: '${tok.lexema}' \
+(${term}) inesperado para <${topo}>. Esperado: ${esp}`;
+        erros.push(msg);
+        trajetoria.push({ ..., acao: `❌ ERRO — ${msg}`, tipo: "erro" });
+
+        const sync = new Set(["#", "}", "$", "SE", "ENQUANTO", "PARA",
+                               "RECEBE", "MOSTRA", "ID", "PARE", "SENAO"]);
+
+        if (!recuperacao) break;
+        if (sync.has(term)) {
+            pilha.pop();         // token atual é de sincronização → descarta o topo
+        } else {
+            if (idx < entrada.length - 1) idx++;  // avança o buffer
+        }
+        if (erros.length >= 10) { erros.push("Muitos erros. Análise interrompida."); break; }
+        continue;
+    }
+
+  Estratégia (tipo 2):
+    Depende se o token atual pertence ao conjunto de sincronização:
+
+    a) Token atual É de sincronização:
+       - O topo (não-terminal) é descartado da pilha.
+       - O buffer NÃO avança — o token de sincronização será processado
+         com o novo topo da pilha na próxima iteração.
+       - Lógica: "esse não-terminal não pode expandir aqui; vou eliminá-lo
+         e tentar o token de sincronização com o próximo símbolo da pilha."
+
+    b) Token atual NÃO é de sincronização:
+       - Avança UMA posição no buffer (descarta o token inesperado).
+       - O topo permanece na pilha.
+       - Lógica: "descarto este token inválido e espero que o próximo
+         seja compatível com o não-terminal atual."
+
+--------------------------------------------------------------------------------
+ Diferença fundamental entre SLR e LL(1) na recuperação
+--------------------------------------------------------------------------------
+
+  SLR:
+    - Reinicia a PILHA completamente (volta ao estado 0).
+    - Avança o buffer até o token de sincronização.
+    - É a abordagem mais "radical" — perde o contexto da pilha.
+
+  LL(1):
+    - NÃO reinicia a pilha.
+    - Faz ajustes locais: ou descarta o topo, ou avança o buffer.
+    - A diferença entre os dois tipos de erro permite respostas mais
+      precisas para cada situação.
+
+
+================================================================================
+FLUXO COMPLETO DE UMA ANÁLISE COM ERROS
+================================================================================
+
+Exemplo hipotético com recuperacao=true (SLR):
+
+  Entrada: x[INTEIRO] VALE 10 + 5#   <- '+' não é token da Bertol (seria ADD)
+
+  1. Parser lê x, [, INTEIRO, ], VALE, 10 — tudo normal.
+  2. Encontra '+': não há ação em SLR_ACTION para este token.
+  3. Registra erro: "token inesperado '+'. Esperado: #, ADD, SUB, ..."
+  4. Avança buffer descartando '+'.
+  5. Encontra '5': não é token de sincronização, descarta também.
+  6. Encontra '#': token de sincronização — para o avanço.
+  7. Reinicia pilha para [0].
+  8. Retoma: processa '#' a partir do estado 0.
+  9. Chega ao fim ($): aceita com erro.
+  10. Retorna sucesso=false, erros=["token inesperado '+'..."].
+
+

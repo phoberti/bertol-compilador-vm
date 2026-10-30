@@ -1,0 +1,37 @@
+@@ TESTE 02 — Expressões aritméticas
+@@ Testa: ADD, SUB, MULT, DIV, RESTO, expressões aninhadas, precedência
+@@ TAC esperado: temporários t1..tN, operadores + - * / %
+
+a[INTEIRO] VALE 10#
+b[INTEIRO] VALE 3#
+
+soma[INTEIRO]#
+soma VALE a ADD b#
+MOSTRA["10 + 3 = "]#
+MOSTRA[soma]#
+
+sub[INTEIRO]#
+sub VALE a SUB b#
+MOSTRA["10 - 3 = "]#
+MOSTRA[sub]#
+
+mult[INTEIRO]#
+mult VALE a MULT b#
+MOSTRA["10 * 3 = "]#
+MOSTRA[mult]#
+
+div[INTEIRO]#
+div VALE a DIV b#
+MOSTRA["10 / 3 = "]#
+MOSTRA[div]#
+
+resto[INTEIRO]#
+resto VALE a RESTO b#
+MOSTRA["10 % 3 = "]#
+MOSTRA[resto]#
+
+@@ Expressão aninhada: ((10 + 3) * (10 - 3))
+aninhado[INTEIRO]#
+aninhado VALE (a ADD b) MULT (a SUB b)#
+MOSTRA["(10+3)*(10-3) = "]#
+MOSTRA[aninhado]#

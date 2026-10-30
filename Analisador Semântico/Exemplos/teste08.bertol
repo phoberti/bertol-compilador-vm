@@ -1,0 +1,34 @@
+@@ TESTE 08 — Algoritmos: fatorial e potência
+@@ Testa: PARA aninhado com lógica acumulativa, múltiplas variáveis
+@@ TAC esperado: dois laços independentes com temporários corretos
+
+@@ Fatorial de N
+n[INTEIRO]#
+MOSTRA["Digite N para fatorial (1 a 10): "]#
+RECEBE[n]#
+
+fat[INTEIRO] VALE 1#
+i[INTEIRO]#
+PARA i DE 1 ATE n PASSO 1 {
+    fat VALE fat MULT i#
+}
+MOSTRA["Fatorial de "]#
+MOSTRA[n]#
+MOSTRA[" = "]#
+MOSTRA[fat]#
+
+@@ Potência: base^exp por multiplicações sucessivas
+base[INTEIRO]#
+exp[INTEIRO]#
+MOSTRA["Digite a base: "]#
+RECEBE[base]#
+MOSTRA["Digite o expoente: "]#
+RECEBE[exp]#
+
+pot[INTEIRO] VALE 1#
+j[INTEIRO]#
+PARA j DE 1 ATE exp PASSO 1 {
+    pot VALE pot MULT base#
+}
+MOSTRA["Potencia = "]#
+MOSTRA[pot]#

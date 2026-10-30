@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bertol — Analisador Léxico</title>
+    <link rel="icon" type="image/png" href="bthumb.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrapper">
+
+    <header>
+        <img src="bthumb.png" class="logo-img" alt="Bertol">
+        <div class="header-text">
+            <h1>Bertol</h1>
+            <p>Analisador Léxico</p>
+        </div>
+    </header>
+
+    <div class="panel">
+        <div class="panel-header">
+            Código-Fonte Bertol
+        </div>
+        <textarea id="editor" spellcheck="false">@@ Exemplo completo — linguagem Bertol
+limite[INTEIRO] VALE 0#
+contador[INTEIRO]#
+
+MOSTRA["Informe um valor: "]#
+RECEBE[limite]#
+
+SE(limite MAIOR 0) {
+    PARA contador DE 0 ATE limite PASSO 1 {
+        MOSTRA[contador]#
+    }
+}
+SENAO {
+    MOSTRA["O limite deve ser maior que 0."]#
+}
+
+@@ Expressao aritmetica
+resultado[DECIMAL]#
+resultado VALE ((3 ADD 2) SUB (10 DIV 5))#
+MOSTRA["Resultado: ", resultado]#
+
+@@ Operadores logicos
+flag[LOGICO]#
+flag VALE XX((10 DIFERENTE 10) $$ VERDADEIRO)#
+MOSTRA["Flag: ", flag]#
+</textarea>
+        <div class="toolbar">
+            <label class="btn btn-load" for="file-input"> Carregar Arquivo</label>
+            <input type="file" id="file-input" accept=".txt,.bertol">
+            <button class="btn btn-primary" id="btn-analisar"> Analisar</button>
+            <button class="btn btn-secondary" id="btn-limpar"> Limpar</button>
+            <span class="spacer"></span>
+            <span class="stats" id="stats"></span>
+        </div>
+    </div>
+
+    <div class="panel" id="output-panel" style="display:none">
+        <div class="tabs">
+            <div class="tab active" data-tab="tokens">Tokens</div>
+            <div class="tab" data-tab="erros">Erros &amp; Avisos</div>
+        </div>
+
+        <div id="tab-tokens">
+            <div class="summary" id="summary"></div>
+            <div class="token-table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="td-num">#</th>
+                            <th>Token</th>
+                            <th>Lexema</th>
+                            <th>Linha</th>
+                            <th class="td-expand"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="token-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="tab-erros" style="display:none">
+            <div class="msg-block" id="erros-body"></div>
+        </div>
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+<script>
+
+document.getElementById('file-input').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => { document.getElementById('editor').value = reader.result; };
+    reader.readAsText(file);
+    e.target.value = '';
+});
+
+document.getElementById('btn-limpar').addEventListener('click', () => {
+    document.getElementById('editor').value = '';
+    document.getElementById('output-panel').style.display = 'none';
+    document.getElementById('stats').textContent = '';
+});
+
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const name = tab.dataset.tab;
+        document.getElementById('tab-tokens').style.display = name === 'tokens' ? '' : 'none';
+        document.getElementById('tab-erros').style.display  = name === 'erros'  ? '' : 'none';
+    });
+});
+
+document.getElementById('btn-analisar').addEventListener('click', () => {
+    const codigo = document.getElementById('editor').value;
+    if (!codigo.trim()) { alert('Digite ou carregue um código-fonte Bertol.'); return; }
+
+    const { tokens, erros } = executarAnalisadorLexicoAFD(codigo, getTabelaSimbolos());
+
+    renderTokens(tokens);
+    renderErros(erros, tokens.length);
+
+    document.getElementById('stats').textContent =
+        `${tokens.length} token(s)   ${erros.length} erro(s)`;
+    document.getElementById('output-panel').style.display = '';
+    console.log('Tokens Bertol:', tokens);
+});
+
+function renderTokens(tokens) {
+    const tbody = document.getElementById('token-body');
+    tbody.innerHTML = '';
+
+    const contagem = {};
+    tokens.forEach(t => {
+        const cat = categorizarToken(t.token);
+        contagem[cat] = (contagem[cat] || 0) + 1;
+    });
+
+    document.getElementById('summary').innerHTML =
+        `<div class="summary-item"><span class="summary-label">Total:</span><span class="summary-val ok">${tokens.length}</span></div>` +
+        Object.entries(contagem).map(([k, v]) =>
+            `<div class="summary-item"><span class="summary-label">${k}:</span><span class="summary-val">${v}</span></div>`
+        ).join('');
+
+    tokens.forEach((tok, i) => {
+
+        // ── Linha principal ──────────────────────────────────
+        const tr = document.createElement('tr');
+        tr.className = 'token-row';
+        if (tok.token === 'COMENTARIO') tr.classList.add('dimmed');
+
+        tr.innerHTML = `
+            <td class="td-num">${i + 1}</td>
+            <td class="td-token"><span class="tag ${tagClass(tok.token)}">${tok.token}</span></td>
+            <td class="td-lexema">${escapeHtml(tok.lexema)}</td>
+            <td class="td-linha">${tok.linha}</td>
+            <td class="td-expand">
+                <button class="btn-expand" title="Ver trajetória do AFD">▶</button>
+            </td>`;
+        tbody.appendChild(tr);
+
+        // ── Linha de trajetória (oculta por padrão) ──────────
+        const trTraj = document.createElement('tr');
+        trTraj.className = 'traj-row';
+        trTraj.style.display = 'none';
+
+        const tdTraj = document.createElement('td');
+        tdTraj.colSpan = 5;
+        tdTraj.className = 'traj-cell';
+
+        const traj = tok.trajetoria || [];
+        if (traj.length === 0) {
+            tdTraj.innerHTML = '<span class="traj-empty">Sem trajetória registrada.</span>';
+        } else {
+            let html = '<div class="traj-steps">';
+            html += `<span class="traj-state">${escapeHtml(traj[0].de)}</span>`;
+            traj.forEach(passo => {
+                const isErro = passo.para === 'ERRO';
+                html += `
+                    <span class="traj-arrow ${isErro ? 'arrow-erro' : ''}">
+                        <span class="traj-char">'${escapeHtml(passo.char)}'</span>
+                        <span class="traj-seta">→</span>
+                    </span>
+                    <span class="traj-state ${isErro ? 'state-erro' : ''}">${escapeHtml(passo.para)}</span>`;
+            });
+            const ultimoPara = traj[traj.length - 1].para;
+            if (ultimoPara !== 'ERRO') {
+                html += `<span class="traj-aceito"> Aceito</span>`;
+            }
+            html += '</div>';
+            tdTraj.innerHTML = html;
+        }
+
+        trTraj.appendChild(tdTraj);
+        tbody.appendChild(trTraj);
+
+        // ── Toggle ────────────────────────────────────────────
+        tr.querySelector('.btn-expand').addEventListener('click', () => {
+            const aberto = trTraj.style.display !== 'none';
+            trTraj.style.display = aberto ? 'none' : '';
+            tr.querySelector('.btn-expand').textContent = aberto ? '▶' : '▼';
+            tr.classList.toggle('expanded', !aberto);
+        });
+    });
+}
+
+function renderErros(erros, totalTokens) {
+    const body = document.getElementById('erros-body');
+    if (erros.length === 0) {
+        body.innerHTML = `<div class="msg msg-success"><span class="msg-icon"></span><span>Análise léxica concluída sem erros. ${totalTokens} token(s) reconhecido(s).</span></div>`;
+        return;
+    }
+    body.innerHTML = erros.map(e =>
+        `<div class="msg msg-error"><span class="msg-icon"></span><span><strong>Linha ${e.linha}:</strong> ${escapeHtml(e.msg)}</span></div>`
+    ).join('');
+}
+
+function categorizarToken(token) {
+    if (token === 'ID')         return 'Identificadores';
+    if (token === 'NUM_INT')    return 'Inteiros';
+    if (token === 'NUM_REAL')   return 'Decimais';
+    if (token === 'STRING')     return 'Strings';
+    if (token === 'BOOLEAN')    return 'Booleanos';
+    if (token === 'COMENTARIO') return 'Comentários';
+    if (token === 'VALE')       return 'Atribuição';
+    if (token === '#')          return 'Fim Instrução';
+    if (['INTEIRO','DECIMAL','TEXTO','LOGICO'].includes(token))                     return 'Tipos';
+    if (['SE','SENAO','ENQUANTO','PARA','DE','ATE','PASSO','PARE'].includes(token)) return 'Controle';
+    if (['ADD','SUB','DIV','MULT','RESTO'].includes(token))                         return 'Aritméticos';
+    if (['MENOR','MAIOR','IGUAL','MAG','MEG','DIFERENTE'].includes(token))          return 'Relacionais';
+    if (['$$','??','XX'].includes(token))                                            return 'Lógicos';
+    if (['RECEBE','MOSTRA'].includes(token))                                         return 'E/S';
+    return 'Delimitadores';
+}
+
+function tagClass(token) {
+    if (token === 'ID')         return 'tag-ID';
+    if (token === 'NUM_INT')    return 'tag-NUM_INT';
+    if (token === 'NUM_REAL')   return 'tag-NUM_REAL';
+    if (token === 'STRING')     return 'tag-STRING';
+    if (token === 'BOOLEAN')    return 'tag-BOOLEAN';
+    if (token === 'COMENTARIO') return 'tag-COMENT';
+    if (token === 'VALE')       return 'tag-ATRIB';
+    if (token === '#')          return 'tag-FIM';
+    if (['INTEIRO','DECIMAL','TEXTO','LOGICO'].includes(token))                     return 'tag-TIPO';
+    if (['SE','SENAO','ENQUANTO','PARA','DE','ATE','PASSO','PARE'].includes(token)) return 'tag-CONTROLE';
+    if (['ADD','SUB','DIV','MULT','RESTO'].includes(token))                         return 'tag-ARIT';
+    if (['MENOR','MAIOR','IGUAL','MAG','MEG','DIFERENTE'].includes(token))          return 'tag-REL';
+    if (['$$','??','XX'].includes(token))                                            return 'tag-LOG';
+    if (['RECEBE','MOSTRA'].includes(token))                                         return 'tag-ES';
+    return 'tag-DELIM';
+}
+
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

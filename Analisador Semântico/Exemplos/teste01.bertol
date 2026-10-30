@@ -1,0 +1,22 @@
+@@ TESTE 01 — Declarações, atribuições simples e MOSTRA
+@@ Testa: declaração com e sem valor, atribuição, MOSTRA com STRING e ID
+@@ TAC esperado: atribuições diretas, instruções print
+
+inteiro[INTEIRO] VALE 42#
+decimal[DECIMAL] VALE 3.14#
+texto[TEXTO] VALE "Bertol"#
+logico[LOGICO] VALE VERDADEIRO#
+
+outro[INTEIRO]#
+outro VALE inteiro#
+
+MOSTRA["inteiro: "]#
+MOSTRA[inteiro]#
+MOSTRA["decimal: "]#
+MOSTRA[decimal]#
+MOSTRA["texto: "]#
+MOSTRA[texto]#
+MOSTRA["logico: "]#
+MOSTRA[logico]#
+MOSTRA["outro: "]#
+MOSTRA[outro]#

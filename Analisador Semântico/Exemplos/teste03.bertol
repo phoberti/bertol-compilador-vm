@@ -1,0 +1,53 @@
+@@ TESTE 03 — Expressões relacionais e lógicas
+@@ Testa: MAIOR, MENOR, MAG, MEG, IGUAL, DIFERENTE, $$, ??, XX
+@@ TAC esperado: representação numérica (if/goto/t=0/t=1), and, or, not
+
+x[INTEIRO] VALE 5#
+y[INTEIRO] VALE 10#
+r[LOGICO]#
+
+@@ Relacionais — devem produzir 0 ou 1
+r VALE x MAIOR y#
+MOSTRA["5 > 10 = "]#
+MOSTRA[r]#
+
+r VALE x MENOR y#
+MOSTRA["5 < 10 = "]#
+MOSTRA[r]#
+
+r VALE x IGUAL 5#
+MOSTRA["5 == 5 = "]#
+MOSTRA[r]#
+
+r VALE x DIFERENTE y#
+MOSTRA["5 != 10 = "]#
+MOSTRA[r]#
+
+r VALE x MAG 5#
+MOSTRA["5 >= 5 = "]#
+MOSTRA[r]#
+
+r VALE x MEG y#
+MOSTRA["5 <= 10 = "]#
+MOSTRA[r]#
+
+@@ Lógicos
+a[LOGICO] VALE VERDADEIRO#
+b[LOGICO] VALE FALSO#
+
+r VALE a $$ b#
+MOSTRA["V and F = "]#
+MOSTRA[r]#
+
+r VALE a ?? b#
+MOSTRA["V or F = "]#
+MOSTRA[r]#
+
+r VALE XX a#
+MOSTRA["not V = "]#
+MOSTRA[r]#
+
+@@ Composta
+r VALE (x MAIOR 0) $$ (y MENOR 20)#
+MOSTRA["5>0 and 10<20 = "]#
+MOSTRA[r]#

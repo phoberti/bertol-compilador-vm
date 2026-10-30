@@ -1,0 +1,36 @@
+@@ TESTE 07 — RECEBE com todos os tipos e conversão implícita
+@@ Testa: RECEBE para INTEIRO, DECIMAL, TEXTO, LOGICO
+@@         conversão implícita INTEIRO → DECIMAL (widening)
+@@ TAC esperado: read x, e (float) nas atribuições com widening
+
+@@ Leitura de inteiro
+idade[INTEIRO]#
+MOSTRA["Digite sua idade: "]#
+RECEBE[idade]#
+MOSTRA["Idade informada: "]#
+MOSTRA[idade]#
+
+@@ Leitura de decimal
+altura[DECIMAL]#
+MOSTRA["Digite sua altura (ex: 1.75): "]#
+RECEBE[altura]#
+MOSTRA["Altura informada: "]#
+MOSTRA[altura]#
+
+@@ Leitura de texto
+nome[TEXTO]#
+MOSTRA["Digite seu nome: "]#
+RECEBE[nome]#
+MOSTRA["Nome informado: "]#
+MOSTRA[nome]#
+
+@@ Widening: INTEIRO atribuido a DECIMAL
+media[DECIMAL]#
+media VALE idade#
+MOSTRA["Idade como decimal: "]#
+MOSTRA[media]#
+
+@@ Widening na declaracao
+peso[DECIMAL] VALE 70#
+MOSTRA["Peso (widening de 70): "]#
+MOSTRA[peso]#

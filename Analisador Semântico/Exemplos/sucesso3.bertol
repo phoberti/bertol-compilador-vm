@@ -1,0 +1,49 @@
+@@ sucesso3.bertol
+@@ Cobre: RS-17 (variavel do PARA e INTEIRO),
+@@         RS-18 (DE e PASSO sao INTEIRO),
+@@         RS-19 (ATE e INTEIRO),
+@@         RS-20 (PARE corretamente dentro de laco)
+
+quantidade[INTEIRO] VALE 10#
+soma[INTEIRO] VALE 0#
+i[INTEIRO]#
+achou[LOGICO] VALE FALSO#
+alvo[INTEIRO] VALE 7#
+
+@@ RS-17: 'i' e INTEIRO — OK
+@@ RS-18: DE=1 (literal INTEIRO) e PASSO=1 (literal INTEIRO) — OK
+@@ RS-19: ATE=quantidade (variavel INTEIRO) — OK
+PARA i DE 1 ATE quantidade PASSO 1 {
+    soma VALE soma ADD i#
+
+    @@ RS-20: PARE dentro do laco PARA — OK
+    SE(i IGUAL alvo) {
+        achou VALE VERDADEIRO#
+        PARE#
+    }
+}
+
+MOSTRA["Soma ate encontrar alvo: ", soma]#
+MOSTRA["Alvo encontrado: ", achou]#
+MOSTRA["Parou em i = ", i]#
+
+@@ Segundo laco: DE e PASSO com literais, ATE com expressao INTEIRO
+passo[INTEIRO] VALE 2#
+limite[INTEIRO] VALE 20#
+j[INTEIRO]#
+contaPares[INTEIRO] VALE 0#
+
+@@ RS-17: 'j' e INTEIRO — OK
+@@ RS-18: DE=0, PASSO=passo (variavel INTEIRO) — OK
+@@ RS-19: ATE=limite (variavel INTEIRO) — OK
+PARA j DE 0 ATE limite PASSO passo {
+    contaPares VALE contaPares ADD 1#
+
+    @@ RS-20: PARE dentro do laco PARA — OK
+    SE(contaPares IGUAL 4) {
+        PARE#
+    }
+}
+
+MOSTRA["Pares contados: ", contaPares]#
+MOSTRA["Ultimo j: ", j]#

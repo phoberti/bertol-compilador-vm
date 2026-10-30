@@ -1,0 +1,29 @@
+@@ erro3.bertol
+@@ Cobre: RS-06 (variavel nao declarada usada em expressao),
+@@         RS-08 (operador aritmetico em LOGICO ou TEXTO),
+@@         RS-09 (operador relacional numerico em tipo nao numerico),
+@@         RS-10 (IGUAL/DIFERENTE comparando tipos diferentes)
+
+temperatura[DECIMAL] VALE 36.8#
+ativo[LOGICO] VALE VERDADEIRO#
+categoria[TEXTO] VALE "A"#
+
+@@ RS-06: 'limiar' nao foi declarado — uso em expressao invalido
+resultado[LOGICO]#
+resultado VALE temperatura MAIOR limiar#
+
+@@ RS-08: ADD nao aceita LOGICO como operando
+valor[INTEIRO]#
+valor VALE ativo ADD 1#
+
+@@ RS-08: MULT nao aceita TEXTO como operando
+dobro[INTEIRO]#
+dobro VALE categoria MULT 2#
+
+@@ RS-09: MENOR nao aceita TEXTO como operando (relacional numerico)
+textoMenor[LOGICO]#
+textoMenor VALE categoria MENOR temperatura#
+
+@@ RS-10: IGUAL compara INTEIRO com TEXTO — tipos diferentes
+mismatch[LOGICO]#
+mismatch VALE valor IGUAL categoria#

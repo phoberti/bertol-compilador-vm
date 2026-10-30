@@ -1,0 +1,9 @@
+@@ Erro Sintático 3 — PARA com estrutura incorreta
+i[INTEIRO]#
+
+@@ Falta ATE e PASSO na estrutura do PARA
+PARA i DE 1 {
+    MOSTRA[i]#
+}
+
+MOSTRA["Fim"]#

@@ -1,0 +1,5 @@
+@@ Erro Sintático 1 — Falta "#" ao final dos comandos
+nome[TEXTO] VALE "Pedro"
+idade[INTEIRO] VALE 25#
+
+MOSTRA["Nome: ", nome]#

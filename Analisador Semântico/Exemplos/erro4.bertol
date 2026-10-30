@@ -1,0 +1,36 @@
+@@ erro4.bertol
+@@ Cobre: RS-11 ($$ ou ?? com operando nao-LOGICO),
+@@         RS-12 (XX com operando nao-LOGICO),
+@@         RS-15 (condicao do SE nao e LOGICO),
+@@         RS-16 (condicao do ENQUANTO nao e LOGICO)
+
+contador[INTEIRO] VALE 0#
+nome[TEXTO] VALE "teste"#
+valor[DECIMAL] VALE 3.14#
+ativo[LOGICO] VALE VERDADEIRO#
+
+@@ RS-11: $$ exige LOGICO em ambos os lados — 'contador' e INTEIRO
+resultado1[LOGICO]#
+resultado1 VALE ativo $$ contador#
+
+@@ RS-11: ?? exige LOGICO em ambos os lados — 'valor' e DECIMAL
+resultado2[LOGICO]#
+resultado2 VALE ativo ?? valor#
+
+@@ RS-12: XX exige operando LOGICO — 'contador' e INTEIRO
+resultado3[LOGICO]#
+resultado3 VALE XX contador#
+
+@@ RS-12: XX exige operando LOGICO — 'nome' e TEXTO
+resultado4[LOGICO]#
+resultado4 VALE XX nome#
+
+@@ RS-15: condicao do SE deve ser LOGICO — 'contador' e INTEIRO
+SE(contador) {
+    MOSTRA["Contador nao zero."]#
+}
+
+@@ RS-16: condicao do ENQUANTO deve ser LOGICO — 'valor' e DECIMAL
+ENQUANTO(valor) {
+    valor VALE valor SUB 1.0#
+}

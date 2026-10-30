@@ -1,0 +1,259 @@
+================================================================================
+  LINGUAGEM BERTOL — ESPECIFICAÇÃO DA ANÁLISE SEMÂNTICA
+================================================================================
+
+  Código-fonte -> Léxico -> Sintático -> [Semântico] -> TAC -> Berti VM
+
+
+================================================================================
+ REGRAS SEMÂNTICAS
+================================================================================
+
+Declaração de variáveis
+-----------------------------
+
+  RS-01 | Declaração única
+        | Um identificador não pode ser declarado mais de uma vez no mesmo
+        | escopo.
+        | Erro: "Variável 'X' já declarada na linha N"
+
+  RS-02 | Tipo válido na declaração
+        | O tipo deve ser um dos quatro tipos primitivos: INTEIRO, DECIMAL,
+        | TEXTO, LOGICO. (Verificado pelo sintático — tipo inválido nunca
+        | chega ao semântico.)
+
+  RS-03 | Compatibilidade na declaração com atribuição
+        | Na forma ID[TIPO] VALE expr#, o tipo da expressão deve ser
+        | compatível com o tipo declarado.
+        | Erro: "Tipo incompatível: esperado INTEIRO, encontrado TEXTO"
+
+
+ Atribuição
+--------------
+
+  RS-04 | Variável declarada
+        | O identificador do lado esquerdo deve estar declarado antes do uso.
+        | Erro: "Variável 'X' não declarada"
+
+  RS-05 | Compatibilidade de tipo
+        | O tipo da expressão do lado direito deve ser compatível com o tipo
+        | da variável.
+        | Erro: "Tipo incompatível: variável 'X' é INTEIRO, expressão é TEXTO"
+
+
+ Uso de variáveis em expressões
+------------------------------------
+
+  RS-06 | Declaração antes do uso
+        | Todo identificador usado em uma expressão deve ter sido declarado.
+        | Erro: "Variável 'X' não declarada"
+
+  RS-07 | Inicialização antes do uso
+        | Todo identificador usado em uma expressão deve ter sido inicializado.
+        | Erro: "Variável 'X' usada antes de ser inicializada"
+
+
+ Expressões e operadores
+-----------------------------
+
+  RS-08 | Operadores aritméticos
+        | ADD, SUB, MULT, DIV, RESTO exigem operandos do tipo INTEIRO ou
+        | DECIMAL.
+        | Erro: "Operador aritmético aplicado a tipo TEXTO ou LOGICO"
+
+  RS-09 | Operadores relacionais numéricos
+        | MAIOR, MENOR, MAG, MEG exigem operandos do mesmo tipo numérico
+        | (INTEIRO ou DECIMAL).
+        | Erro: "Operador relacional numérico aplicado a tipo incompatível"
+
+  RS-10 | IGUAL e DIFERENTE
+        | Aceitam operandos de qualquer tipo, desde que ambos os lados sejam
+        | do mesmo tipo.
+        | Erro: "Tipos diferentes em comparação de igualdade"
+
+  RS-11 | Operadores lógicos binários
+        | $$ e ?? exigem operandos do tipo LOGICO.
+        | Erro: "Operador lógico aplicado a tipo não-LOGICO"
+
+  RS-12 | Operador lógico unário
+        | XX exige operando do tipo LOGICO.
+        | Erro: "Operador XX aplicado a tipo não-LOGICO"
+
+  RS-13 | Resultado de expressão aritmética (inferência de tipo)
+        | A inferência de tipo é aplicada recursivamente: subexpressões entre
+        | parênteses são avaliadas antes do operador externo. O tipo produzido
+        | por uma expressão aritmética segue a regra:
+        |   - INTEIRO, se ambos os operandos forem INTEIRO
+        |   - DECIMAL, se ao menos um operando for DECIMAL
+        | (Regra de inferência — sem erro direto)
+        |
+        | Exemplos de inferência recursiva:
+        |   (n RESTO 2)         → INTEIRO  (RESTO entre INTEIROs)
+        |   (a ADD b)           → INTEIRO  (se a e b são INTEIRO)
+        |   (x ADD 1.0)         → DECIMAL  (1.0 é DECIMAL)
+
+  RS-14 | Resultado de expressão relacional/lógica (inferência de tipo)
+        | Qualquer expressão com operador relacional (MAIOR, MENOR, MAG, MEG,
+        | IGUAL, DIFERENTE) ou lógico ($$, ??, XX) produz tipo LOGICO,
+        | independentemente do tipo dos operandos. A inferência é recursiva:
+        | subexpressões entre parênteses são avaliadas antes do operador externo.
+        | (Regra de inferência — sem erro direto)
+        |
+        | Exemplos de inferência recursiva:
+        |   (n RESTO 2) IGUAL 0     → LOGICO
+        |     (n RESTO 2) → INTEIRO (RS-13)
+        |     IGUAL entre INTEIRO e INTEIRO → LOGICO (RS-14)
+        |
+        |   primo $$ (div MENOR num) → LOGICO
+        |     primo → LOGICO
+        |     (div MENOR num) → LOGICO (RS-14, MENOR produz LOGICO)
+        |     $$ entre LOGICO e LOGICO → LOGICO (RS-11 ok, RS-14)
+        |
+        |   (x MAIOR 0) $$ (y MENOR 20) → LOGICO
+        |     cada lado entre parênteses produz LOGICO independentemente
+
+
+ Estruturas de controle
+----------------------------
+
+  RS-15 | Condição do SE
+        | A expressão entre parênteses no SE deve ser do tipo LOGICO.
+        | Erro: "Condição do SE deve ser LOGICO, encontrado INTEIRO"
+
+  RS-16 | Condição do ENQUANTO
+        | A expressão entre parênteses no ENQUANTO deve ser do tipo LOGICO.
+        | Erro: "Condição do ENQUANTO deve ser LOGICO, encontrado DECIMAL"
+
+  RS-17 | Variável do PARA
+        | O identificador após PARA deve estar declarado e ser do tipo INTEIRO.
+        | Erro: "Variável do PARA deve ser INTEIRO"
+
+  RS-18 | Valores de DE e PASSO
+        | Os valores de DE e PASSO devem ser do tipo INTEIRO (literais inteiros
+        | ou identificadores do tipo INTEIRO).
+        | Erro: "Valor de DE/PASSO deve ser INTEIRO"
+
+  RS-19 | Valor de ATE
+        | O valor de ATE deve ser do tipo INTEIRO (literal inteiro ou
+        | identificador do tipo INTEIRO).
+        | Erro: "Valor de ATE deve ser INTEIRO"
+
+  RS-20 | PARE dentro de laço
+        | A instrução PARE só pode aparecer dentro de um laço (ENQUANTO ou
+        | PARA).
+        | Erro: "PARE fora de estrutura de repetição"
+
+
+ Entrada e saída
+---------------------
+
+  RS-21 | RECEBE — declaração
+        | O identificador em RECEBE[ID] deve estar declarado.
+        | Erro: "Variável 'X' não declarada"
+
+  RS-22 | MOSTRA — itens válidos
+        | Cada item da lista do MOSTRA deve ser uma STRING literal ou um
+        | identificador declarado (qualquer tipo).
+        | Erro: "Variável 'X' não declarada em MOSTRA"
+
+
+================================================================================
+COMPATIBILIDADE DE TIPOS
+================================================================================
+
+
+  Tipo destino  | Tipo origem                  | Compatível?
+  --------------|------------------------------|-------------
+  INTEIRO       | INTEIRO                      | Sim
+  INTEIRO       | DECIMAL                      | Sim
+  INTEIRO       | TEXTO                        | Não
+  INTEIRO       | LOGICO                       | Não
+  DECIMAL       | DECIMAL                      | Sim
+  DECIMAL       | INTEIRO                      | Sim
+  TEXTO         | TEXTO                        | Sim
+  TEXTO         | INTEIRO / DECIMAL / LOGICO   | Não
+  LOGICO        | LOGICO                       | Sim
+  LOGICO        | INTEIRO / DECIMAL / TEXTO    | Não
+
+================================================================================
+ EXEMPLOS DE CÓDIGO COM ANOTAÇÕES SEMÂNTICAS
+================================================================================
+
+
+ Programa válido — nenhum erro semântico
+--------------------------------------------
+
+  limite[INTEIRO]#               @@ RS-01: inserido na tabela, tipo INTEIRO
+  contador[INTEIRO]#             @@ RS-01: inserido na tabela, tipo INTEIRO
+
+  MOSTRA["Informe um valor: "]#  @@ RS-22: STRING literal — OK
+  RECEBE[limite]#                @@ RS-21: 'limite' declarado — OK
+                                 @@         inicializado=true
+
+  SE(limite MAIOR 0) {           @@ RS-15: MAIOR produz LOGICO — OK
+      PARA contador DE 0 ATE limite PASSO 1 {
+                                 @@ RS-17: contador é INTEIRO — OK
+                                 @@ RS-18: DE=0 inteiro literal — OK
+                                 @@         PASSO=1 inteiro literal — OK
+                                 @@ RS-19: ATE=limite é INTEIRO — OK
+          MOSTRA[contador]#      @@ RS-22: 'contador' declarado — OK
+      }
+  }
+
+
+ Erros semânticos típicos
+------------------------------
+
+  [RS-01] Declaração duplicada:
+    x[INTEIRO]#
+    x[DECIMAL]#      @@ ERRO: variável 'x' já declarada na linha 1
+
+  [RS-04/RS-06] Variável não declarada:
+    MOSTRA[resultado]#   @@ ERRO: variável 'resultado' não declarada
+
+  [RS-07] Variável não inicializada:
+    total[INTEIRO]#
+    MOSTRA[total]#       @@ ERRO: variável 'total' usada antes de ser
+                         @@        inicializada
+
+  [RS-05] Tipo incompatível na atribuição:
+    nome[TEXTO]#
+    nome VALE 42#        @@ ERRO: variável 'nome' é TEXTO, expressão é INTEIRO
+
+  [RS-15] Condição do SE não é LOGICO:
+    x[INTEIRO]#
+    x VALE 10#
+    SE(x) {              @@ ERRO: condição do SE deve ser LOGICO,
+        MOSTRA[x]#       @@        encontrado INTEIRO
+    }
+
+  [RS-20] PARE fora de laço:
+    PARE#                @@ ERRO: instrução PARE fora de estrutura de repetição
+
+  [RS-08] Operador aritmético em tipo inválido:
+    flag[LOGICO]#
+    flag VALE VERDADEIRO#
+    x[INTEIRO]#
+    x VALE flag ADD 1#   @@ ERRO: operador ADD aplicado a tipo LOGICO
+
+
+================================================================================
+COMPORTAMENTO DO ANALISADOR SEMÂNTICO
+================================================================================
+
+Modo normal
+---------------
+
+O analisador para imediatamente ao encontrar o primeiro erro semântico e reporta
+a mensagem de erro com o número da linha correspondente.
+
+
+ Modo com recuperação
+-------------------------
+
+O analisador continua a análise após encontrar um erro, reportando todos os
+erros encontrados. Ao detectar uma variável não declarada, ela é inserida
+temporariamente na tabela com tipo INTEIRO para evitar erros em cascata nas
+produções seguintes.
+
+Limite: a recuperação é interrompida após 10 erros semânticos acumulados.

@@ -1,0 +1,18 @@
+@@ erro1.bertol
+@@ Cobre: RS-01 (declaracao duplicada),
+@@         RS-07 (variavel usada antes de ser inicializada),
+@@         RS-21 (RECEBE com variavel nao declarada)
+
+@@ RS-01: 'pontos' declarado duas vezes
+pontos[INTEIRO] VALE 100#
+pontos[DECIMAL] VALE 9.5#
+
+@@ RS-07: 'bonus' declarado mas nunca inicializado antes do uso
+bonus[INTEIRO]#
+total[INTEIRO]#
+total VALE pontos ADD bonus#
+
+@@ RS-21: 'usuario' nunca foi declarado
+RECEBE[usuario]#
+
+MOSTRA["Total: ", total]#
